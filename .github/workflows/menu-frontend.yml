@@ -36,6 +36,7 @@ on:
 
 env:
   AZURE_WEBAPP_NAME: menu-mingles-frontend # set this to the name of your Azure Web App
+  DOCKER_IMAGE_NAME: frontend
 
 permissions:
   contents: read
@@ -58,16 +59,13 @@ jobs:
           username: ${{ secrets.AZURE_CONTAINER_REGISTRY_USER }}
           password: ${{ secrets.AZURE_CONTAINER_REGISTRY_PASSWORD }}
 
-      - name: Lowercase the repo name and username
-        run: echo "REPO=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
-
       - name: Build and push container image to registry
         uses: docker/build-push-action@0565240e2d4ab88bba5387d719585280857ece09 # v5.0.0
         with:
           context: ./menu-frontend/.
           push: true
-          tags: menumingles.azurecr.io/${{ env.REPO }}:${{ github.sha }}
           file: menu-frontend/Dockerfile
+          tags: menumingles.azurecr.io/${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
 
   deploy:
     permissions:
@@ -79,13 +77,10 @@ jobs:
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
     steps:
-      - name: Lowercase the repo name and username
-        run: echo "REPO=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
-
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.FRONTEND_AZURE_WEBAPP_PUBLISH_PROFILE }}
-          images: 'menumingles.azurecr.io/${{ env.REPO }}:${{ github.sha }}'
+          images: 'menumingles.azurecr.io/${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}'
