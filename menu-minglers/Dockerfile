@@ -10,9 +10,13 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
   POETRY_CACHE_DIR='/var/cache/pypoetry' \
   POETRY_HOME='/usr/local'
 
+RUN apt-get update && apt-get install -y --no-install-recommends \
+  git \
+  && rm -rf /var/lib/apt/lists/*
+
 # Install Poetry
-RUN curl -sSL https://install.python-poetry.org | python3 -
-ENV PATH="$POETRY_HOME/bin:$PATH"
+RUN pip install poetry
+RUN poetry self add poetry-plugin-export
 
 # Create non-root user
 RUN groupadd -r appuser && useradd -r -g appuser appuser
@@ -23,9 +27,9 @@ WORKDIR /app
 # Copy poetry files
 COPY pyproject.toml poetry.lock* ./
 
-# Install dependencies
-RUN poetry config virtualenvs.in-project true \
-  && poetry install --no-dev --no-interaction --no-ansi
+RUN poetry export -f requirements.txt --output requirements.txt --without-hashes
+RUN --mount=type=cache,target=/root/.cache/pip \
+  pip install --no-compile -r requirements.txt
 
 # Copy application code
 COPY app/ ./app/
