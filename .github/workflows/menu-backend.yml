@@ -27,6 +27,7 @@
 name: Menu Backend Build and Deploy
 
 on:
+  workflow_dispatch:
   push:
     branches:
     - main
@@ -35,11 +36,6 @@ on:
 
 env:
   AZURE_WEBAPP_NAME: menu-mingles-backend # set this to the name of your Azure Web App
-
-on:
-  push:
-    branches: [ "meister" ]
-  workflow_dispatch:
 
 permissions:
   contents: read
@@ -93,4 +89,5 @@ jobs:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.BACKEND_AZURE_WEBAPP_PUBLISH_PROFILE }}
           images: 'menumingles.azurecr.io/${{ env.REPO }}:${{ github.sha }}'
+
 
