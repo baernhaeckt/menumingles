@@ -1,3 +1,5 @@
+name: Menu Backend Build and Deploy
+
 on:
   push:
     branches:
@@ -36,4 +38,5 @@ jobs:
         containerAppName: ${{ env.CONTAINER_APP_NAME }}
         containerAppEnvironment: ${{ env.CONTAINER_APP_ENVIRONMENT_NAME }}
         resourceGroup: ${{ env.RESOURCE_GROUP }}
+
 
