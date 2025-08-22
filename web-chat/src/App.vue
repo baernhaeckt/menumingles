@@ -11,7 +11,7 @@ import HelloWorld from './components/HelloWorld.vue'
     </RouterLink>
   </nav>
 
-  <main id="main-sec" class="grow min-h-0 bg-gray-100">
+  <main id="main-sec" class="grow min-h-0">
     <RouterView />
   </main>
 </template>
