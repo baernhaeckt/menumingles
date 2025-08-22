@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "menu-recommender"
+version = "0.1.0"
+description = "Menu recommender service"
+authors = ["Oliver Hofmann"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = "^0.116.1"
+uvicorn = "^0.35.0"
+pydantic-settings = "^2.10.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
