@@ -1,4 +1,4 @@
-name: Menu Minglers Build and Deploy
+name: Menu Recommender Build and Deploy
 
 on:
   push:
