@@ -5,18 +5,10 @@ FROM python:3.12-slim
 ENV PYTHONDONTWRITEBYTECODE=1 \
   PYTHONUNBUFFERED=1 \
   PYTHONPATH=/app \
-  POETRY_VERSION=1.7.1 \
-  POETRY_HOME="/opt/poetry" \
-  POETRY_VENV_IN_PROJECT=1 \
+  POETRY_VERSION=2.1.3 \
+  POETRY_VIRTUALENVS_CREATE=false \
   POETRY_CACHE_DIR='/var/cache/pypoetry' \
-  PATH="/app/.venv/bin:$PATH"
-
-# Install system dependencies
-RUN apt-get update \
-  && apt-get install -y --no-install-recommends \
-  curl \
-  build-essential \
-  && rm -rf /var/lib/apt/lists/*
+  POETRY_HOME='/usr/local'
 
 # Install Poetry
 RUN curl -sSL https://install.python-poetry.org | python3 -
