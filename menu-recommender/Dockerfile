@@ -14,6 +14,7 @@ ENV PYTHONUNBUFFERED=1
 # install pip requirements
 WORKDIR /tmp
 RUN pip install poetry
+RUN poetry self add poetry-plugin-export
 COPY ./pyproject.toml ./poetry.lock* /tmp/
 RUN poetry export -f requirements.txt --output requirements.txt --without-hashes
 RUN pip install --no-cache-dir --upgrade -r requirements.txt
