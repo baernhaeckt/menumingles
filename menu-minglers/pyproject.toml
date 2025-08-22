@@ -12,6 +12,7 @@ fastapi = "^0.115.14"
 uvicorn = {extras = ["standard"], version = "^0.32.1"}
 pydantic = "^2.10.4"
 pydantic-settings = "^2.8.0"
+tinytroupe = { git = "https://github.com/microsoft/TinyTroupe.git", tag = "v0.5.2" }
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.0"
