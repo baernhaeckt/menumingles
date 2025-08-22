@@ -1,4 +1,10 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
+const hasInvite = computed(() => !!route.query.householdInviteCode)
+
 const particleConfig = {
   fullScreen: {
     zIndex: 1,
@@ -145,15 +151,30 @@ const particleConfig = {
 <template>
   <div class="block bg-white mt-10! p-5 py-24 mx-4 rounded-3xl">
     <img
+      v-if="hasInvite"
       src="@/assets/illustrations/undraw_group-project_kow1.svg"
       alt="illustration"
       class="h-36 w-auto mx-auto mb-16"
     />
+    <img
+        v-else
+        src="@/assets/illustrations/undraw_enter_nwx3.svg"
+        alt="illustration"
+        class="h-36 w-auto mx-auto mb-16"
+    />
 
-    <h1 class="text-center text-red-600 font-poetsen-one text-5xl mb-2">"WG Bern"</h1>
-    <h2 class="mb-12! text-center text-2xl text-neutral-500">
-      You have been invited to this household.<br />Register an account to accept the invitation.
-    </h2>
+    <div v-if="hasInvite">
+      <h1 class="text-center text-red-600 font-poetsen-one text-5xl mb-2">"WG Bern"</h1>
+      <h2 class="mb-12! text-center text-2xl text-neutral-500">
+        You have been invited to this household.<br />Register an account to accept the invitation.
+      </h2>
+    </div>
+    <div v-else>
+      <h1 class="text-center text-red-600 font-poetsen-one text-5xl mb-2">Register</h1>
+      <h2 class="mb-12! text-center text-2xl text-neutral-500">
+        You are creating a new household.<br />Register an account to start.
+      </h2>
+    </div>
 
     <div class="w-1/2! mx-auto mb-5">
       <label class="text-neutral-600" for="account-email"
@@ -200,7 +221,7 @@ const particleConfig = {
     </div>
   </div>
 
-  <vue-particles id="tsparticles" :options="particleConfig" />
+  <vue-particles v-if="hasInvite" id="tsparticles" :options="particleConfig" />
 </template>
 
 <style scoped></style>
