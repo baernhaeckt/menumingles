@@ -1,8 +1,8 @@
 [tool.poetry]
 name = "menu-minglers"
 version = "0.1.0"
-description = "A FastAPI application for menu management"
-authors = ["Your Name <your.email@example.com>"]
+description = "A FastAPI application for BärnHäckt MenuMingle"
+authors = ["Christoph Keller <christoph.keller@bambit.ch>"]
 readme = "README.md"
 packages = [{include = "app"}]
 
@@ -12,6 +12,7 @@ fastapi = "^0.115.14"
 uvicorn = {extras = ["standard"], version = "^0.32.1"}
 pydantic = "^2.10.4"
 pydantic-settings = "^2.8.0"
+python-dotenv = "^1.0.0"
 tinytroupe = { git = "https://github.com/microsoft/TinyTroupe.git", tag = "v0.5.2" }
 
 [tool.poetry.group.dev.dependencies]

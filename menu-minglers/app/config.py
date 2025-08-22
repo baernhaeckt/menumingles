@@ -24,11 +24,16 @@ class Settings(BaseSettings):
     docs_url: Optional[str] = "/docs"
     redoc_url: Optional[str] = "/redoc"
 
+    # Azure OpenAI
+    azure_openai_key: str = Field(default="", env="AZURE_OPENAI_KEY")
+    azure_openai_endpoint: str = Field(default="", env="AZURE_OPENAI_ENDPOINT")
+
     class Config:
         """Pydantic config."""
 
         env_file = ".env"
         case_sensitive = True
+        extra = "ignore"
 
 
 # Global settings instance

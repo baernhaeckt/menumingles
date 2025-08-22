@@ -1,10 +1,13 @@
 """FastAPI application entry point."""
 
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1.router import api_router
 from app.config import settings
+
+load_dotenv()
 
 # Create FastAPI application
 app = FastAPI(
