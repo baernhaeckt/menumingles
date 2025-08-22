@@ -1,4 +1,4 @@
-name: Docker Image CI
+name: Menu Minglers Build and Deploy
 
 on:
   push:
