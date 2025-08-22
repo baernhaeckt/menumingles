@@ -32,6 +32,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
   pip install --no-compile -r requirements.txt
 
 # Copy application code
+COPY config.ini ./config.ini
 COPY app/ ./app/
 
 # Change ownership to non-root user
