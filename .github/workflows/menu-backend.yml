@@ -3,7 +3,7 @@ on:
     branches:
     - main
     paths:
-    - 'backend/**'
+    - 'menu-backend/**'
 env:
   DOTNET_CORE_VERSION: 9.0.x
   CONTAINER_APP_NAME: backend-container-app
@@ -36,3 +36,4 @@ jobs:
         containerAppName: ${{ env.CONTAINER_APP_NAME }}
         containerAppEnvironment: ${{ env.CONTAINER_APP_ENVIRONMENT_NAME }}
         resourceGroup: ${{ env.RESOURCE_GROUP }}
+
