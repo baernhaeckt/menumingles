@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
 </script>
 
 <template>
@@ -11,7 +10,7 @@ import HelloWorld from './components/HelloWorld.vue'
     </RouterLink>
   </nav>
 
-  <main id="main-sec" class="grow min-h-0">
+  <main id="main-sec" class="grow min-h-0 w-full">
     <RouterView />
   </main>
 </template>
