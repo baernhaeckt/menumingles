@@ -1,8 +1,12 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
 import { useAuthStore } from '@/stores/auth.ts'
+import { storeToRefs } from 'pinia'
 
-const { isAuthenticated, getGravatarUrl } = useAuthStore()
+const auth = useAuthStore()
+const { isAuthenticated, getGravatarUrl } = storeToRefs(auth)
+
+auth.initFromCookie();
 </script>
 
 <template>
