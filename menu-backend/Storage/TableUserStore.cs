@@ -56,6 +56,8 @@ public sealed class TableUserStore : IUserStore
             Email = user.Email,
             PasswordSalt = Convert.ToBase64String(salt),
             PasswordHash = Convert.ToBase64String(Hash(password, salt)),
+            Household = user.Household,
+            HouseholdKey = user.HouseholdKey
         };
         await _table.UpsertEntityAsync(entity);
     }
