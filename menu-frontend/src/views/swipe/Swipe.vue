@@ -43,7 +43,6 @@ interact('.item').draggable({
     minSpeed: 10,      // px/s needed to trigger inertia (raise to require a "flick")
     endSpeed: 2,       // px/s where inertia stops
     allowResume: true,  // let users grab the card again mid-inertia
-    endOnly: true,
   },
   listeners: {
     start(event) {
