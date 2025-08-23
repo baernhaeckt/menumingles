@@ -36,6 +36,16 @@ public static class ServiceExtensions
             };
         });
 
+        builder.Services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(policy =>
+            {
+                policy.AllowAnyOrigin()
+                      .AllowAnyHeader()
+                      .AllowAnyMethod();
+            });
+        });
+
         // Add authorization
         builder.Services.AddAuthorization();
 
