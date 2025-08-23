@@ -19,6 +19,17 @@ public static class MiddlewareExtensions
         app.UseAuthentication();
         app.UseAuthorization();
 
+        app.UseCors(x =>
+        {
+            x.AllowAnyMethod()
+                .WithOrigins(
+                    "http://localhost:5173/",
+                    "https://menu-mingles-frontend-cccnfba0ezc2dhbc.northeurope-01.azurewebsites.net/")
+                .AllowAnyHeader()
+                .WithExposedHeaders("Authorization")
+                .AllowCredentials();
+        });
+
         // Serve OpenAPI JSON
         app.MapOpenApi();
     }
