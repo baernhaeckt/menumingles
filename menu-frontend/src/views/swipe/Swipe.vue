@@ -7,7 +7,11 @@ import '@interactjs/modifiers'
 import '@interactjs/dev-tools'
 import '@interactjs/inertia'
 import interact from '@interactjs/interact'
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
+import { httpClient } from '@/client/http-client.ts'
+import { z } from 'zod'
+import { useAuthStore } from '@/stores/auth.ts'
+import { API_IMAGE_GEN_URL } from '@/constants.ts'
 
 function onSwipeLeft() {
   console.log('Swiped left')
@@ -17,16 +21,77 @@ function onSwipeRight() {
   console.log('Swiped right')
 }
 
-const cards = ref([
-  { id: 1, title: 'Card 1', img: 'chiken.jpg' },
-  { id: 2, title: 'Card 2', img: 'noodles.jpg' },
-  { id: 3, title: 'Card 3', img: 'pot.jpg' },
-])
+const auth = useAuthStore()
+
+/**
+ * Starts the planning process for the week.
+ * Results must be kept in memory until all cards have been swiped.
+ */
+async function continuePlanningAsync() {
+  const response = await httpClient.post('v1/planning/continue', undefined, {
+    headers: {
+      Authorization: `Bearer ${auth.token}`,
+    },
+  })
+  return z
+    .object({
+      sessionKey: z.string(),
+      menuSelection: z.array(
+        z.object({
+          name: z.string(),
+          ingredients: z.string().transform((value) => value.split(',')),
+        }),
+      ),
+    })
+    .parse(response.data)
+}
+
+/**
+ * Confirms the selected menu items
+ * from the swiping.
+ * @see continuePlanning must be called first to retrieve the sessionKey and the menu selection.
+ */
+async function selectMenuItemsAsync(request: { sessionKey: string; menuSelection: any }) {
+  const response = await httpClient.post('v1/planning/continue', request, {
+    headers: {
+      Authorization: `Bearer ${auth.token}`,
+    },
+  })
+  if (response.status === 204) {
+    return
+  }
+
+  throw new Error('Failed to continue planning')
+}
+
+const sessionKey = ref<string | null>(null)
+
+onMounted(async () => {
+  const result = await continuePlanningAsync()
+  sessionKey.value = result.sessionKey
+
+  if (result.menuSelection.length % 3 !== 0) {
+    throw new Error(
+      'Each card shows 3 menu items. The API returned an invalid number of items meaning it cannot be processed.',
+    )
+  }
+
+  let count = 0;
+  for (let i = 0; i < result.menuSelection.length; i += 3) {
+    cards.value.push({
+      id: count,
+      names: result.menuSelection.slice(i, i + 3).map((selection) => selection.name),
+      ingredients: result.menuSelection.slice(i, i + 3).map((selection) => selection.ingredients).flatMap(ingredient => ingredient),
+    })
+  }
+});
+
+const cards = ref<{ id: number; names: string[]; ingredients: string[] }[]>([])
 
 const topIndex = computed(() => cards.value.length - 1)
 
 // Container ref to find the current top card element for programmatic swipes
-const deck = ref<HTMLElement | null>(null);
+const deck = ref<HTMLElement | null>(null)
 
 // Programmatic swipe via buttons: animate the top card off-screen with same feel
 function swipeByButton(direction: 'left' | 'right') {
@@ -119,9 +184,9 @@ interact('.item').draggable({
         setTransform(target, offscreenX)
 
         if (direction > 0) onSwipeRight()
-        else onSwipeLeft();
+        else onSwipeLeft()
 
-        cards.value.pop();
+        cards.value.pop()
       } else {
         // Snap back immediately, no delay
         target.style.transition = 'transform 220ms cubic-bezier(.22,.61,.36,1)'
@@ -130,6 +195,12 @@ interact('.item').draggable({
     },
   },
 })
+
+function getImage (name: string) {
+  const url = new URL(API_IMAGE_GEN_URL);
+  url.searchParams.append('name', name);
+  return url.toString();
+}
 </script>
 
 <template>
@@ -150,8 +221,8 @@ interact('.item').draggable({
                 class="absolute w-5/7 -translate-x-14 -translate-y-22 md:-translate-x-20 md:-translate-y-24 md:w-1/2 aspect-video rounded-3xl overflow-hidden"
               >
                 <img
-                  src="@/assets/placeholer-food/chiken.jpg"
-                  alt=""
+                  :src="getImage(card.names[0])"
+                  :alt="card.names[0]"
                   class="w-full h-full object-cover"
                 />
               </div>
@@ -159,8 +230,8 @@ interact('.item').draggable({
                 class="absolute w-6/8 translate-x-12 translate-y-0 md:translate-x-32 md:w-1/2 aspect-video rounded-3xl overflow-hidden"
               >
                 <img
-                  src="@/assets/placeholer-food/noodles.jpg"
-                  alt=""
+                  :src="getImage(card.names[1])"
+                  :alt="card.names[1]"
                   class="w-full h-full object-cover"
                 />
               </div>
@@ -168,8 +239,8 @@ interact('.item').draggable({
                 class="absolute w-5/7 -translate-x-7 translate-y-24 md:-translate-x-22 md:translate-y-18 md:w-1/2 aspect-video rounded-3xl overflow-hidden"
               >
                 <img
-                  src="@/assets/placeholer-food/pot.jpg"
-                  alt=""
+                  :src="getImage(card.names[2])"
+                  :alt="card.names[2]"
                   class="w-full h-full object-cover"
                 />
               </div>
