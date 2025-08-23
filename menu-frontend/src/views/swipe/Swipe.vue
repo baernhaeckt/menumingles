@@ -5,8 +5,9 @@ import '@interactjs/actions/drop'
 import '@interactjs/actions/resize'
 import '@interactjs/modifiers'
 import '@interactjs/dev-tools'
-import "@interactjs/inertia"
+import '@interactjs/inertia'
 import interact from '@interactjs/interact'
+import { computed, ref } from 'vue'
 
 function onSwipeLeft() {
   console.log('Swiped left')
@@ -16,6 +17,14 @@ function onSwipeRight() {
   console.log('Swiped right')
 }
 
+const cards = ref([
+  { id: 1, title: 'Card 1', img: 'chiken.jpg' },
+  { id: 2, title: 'Card 2', img: 'noodles.jpg' },
+  { id: 3, title: 'Card 3', img: 'pot.jpg' },
+])
+
+const topIndex = computed(() => cards.value.length - 1)
+
 function setTransform(el: HTMLElement, x: number) {
   el.style.transform = `translate(${x}px, 0px)`
   el.dataset.x = String(x)
@@ -23,16 +32,6 @@ function setTransform(el: HTMLElement, x: number) {
 
 function getX(el: HTMLElement) {
   return parseFloat(el.dataset.x || '0') || 0
-}
-
-function animateTo(el: HTMLElement, x: number) {
-  el.style.transition = 'transform 300ms ease'
-  setTransform(el, x)
-  const onEnd = () => {
-    el.style.transition = ''
-    el.removeEventListener('transitionend', onEnd)
-  }
-  el.addEventListener('transitionend', onEnd)
 }
 
 interact('.item').draggable({
@@ -59,7 +58,7 @@ interact('.item').draggable({
       const container = target.parentElement
       const width = container?.getBoundingClientRect().width || window.innerWidth
 
-      const threshold = width * 0.3;
+      const threshold = width * 0.3
 
       // Velocity-based projection (px/s -> project over ~250ms)
       const vx = event.velocityX || 0
@@ -86,13 +85,14 @@ interact('.item').draggable({
         setTransform(target, offscreenX)
 
         if (direction > 0) onSwipeRight()
-        else onSwipeLeft()
+        else onSwipeLeft();
+
+        cards.value.pop();
       } else {
         // Snap back immediately, no delay
         target.style.transition = 'transform 220ms cubic-bezier(.22,.61,.36,1)'
         setTransform(target, 0)
       }
-
     },
   },
 })
@@ -100,8 +100,13 @@ interact('.item').draggable({
 
 <template>
   <div class="grow pt-6 flex flex-col">
-    <div class="grow bg-blue-600 h-full w-full relative overflow-hidden">
-      <div class="absolute w-full h-full item px-6 pt-3">
+    <div class="grow h-full w-full relative overflow-hidden">
+      <div
+        v-for="(card, i) in cards"
+        :key="card.id"
+        :class="{ item: i === topIndex, 'pointer-events-none -translate-y-1.5': i !== topIndex }"
+        class="absolute w-full h-full px-6 pt-3 pb-6"
+      >
         <div
           class="h-full bg-neutral-300 shadow-xl border border-neutral-400 border-solid rounded-3xl p-5"
         >
@@ -137,14 +142,16 @@ interact('.item').draggable({
             </div>
 
             <div>
-              <h5 class="text-3xl text-neutral-900 font-poetsen-one text-center">Do you like this food?</h5>
+              <h5 class="text-3xl text-neutral-900 font-poetsen-one text-center">
+                Do you like this food?
+              </h5>
             </div>
           </div>
         </div>
       </div>
     </div>
   </div>
-  <div class="p-10 flex flex-row justify-between">
+  <div class="p-10 py-6 flex flex-row justify-between">
     <button
       class="bg-red-600 rounded-full aspect-square h-16 text-white flex items-center justify-center outline-4 outline-transparent outline-solid outline-offset-2 focus-visible:outline-red-200"
     >
