@@ -1,7 +1,9 @@
 """WebSocket endpoints for real-time communication."""
 
+import asyncio
 import json
 import logging
+import random
 import time
 from typing import Any, Dict
 
@@ -101,12 +103,11 @@ async def broadcast_message(message: ChatMessage):
     """Broadcast a message to all WebSocket clients."""
     ws_service = get_websocket_service()
     try:
-        payload = message.model_dump()  # pydantic v2
-        await ws_service.broadcast_message({
-            "type": "chat",
-            "message": payload,
-            "timestamp": time.time()
-        })
+        payload = {
+            "name": message.name,
+            "message": message.message
+        }
+        await ws_service.broadcast_message(json.dumps(payload))
         return JSONResponse(content={
             "status": "success",
             "message": "Message broadcast successfully"
@@ -126,3 +127,27 @@ async def get_websocket_clients():
     ws_service = get_websocket_service()
     clients = ws_service.get_client_info()
     return JSONResponse(content={"clients": clients, "total": len(clients)})
+
+
+@router.post("/ws/test")
+async def send_test_messages(number_of_messages: int = 10, interval: int = 2):
+    """Send test messages to all clients."""
+    ws_service = get_websocket_service()
+
+    testing_names = ["Hans", "Peter", "Klaus", "Jan",
+                     "Maria", "Anna", "Lisa", "Julia", "Emma", "Sophia"]
+    testing_messages = ["Hello, clients!", "How are you?", "I'm fine, thank you!", "What's your name?", "My name is John Doe",
+                        "Nice to meet you", "What's your favorite color?", "My favorite color is blue", "What's your favorite food?", "My favorite food is pizza"]
+
+    random.shuffle(testing_names)
+    random.shuffle(testing_messages)
+
+    for i in range(number_of_messages):
+        payload = {
+            "name": testing_names[i % len(testing_names)],
+            "message": testing_messages[i % len(testing_messages)]
+        }
+        await ws_service.broadcast_message(json.dumps(payload))
+        await asyncio.sleep(interval)
+
+    return JSONResponse(content={"status": "success", "message": "Test messages sent"})
