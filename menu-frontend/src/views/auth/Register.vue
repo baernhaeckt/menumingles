@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router'
 import { useHead } from '@unhead/vue'
 import { z } from 'zod'
 import { httpClient } from '@/client/http-client.ts'
+import { validate } from '@/forms/validation.ts'
 
 const route = useRoute()
 const hasInvite = computed(() => !!route.query.householdInviteCode)
@@ -55,7 +56,6 @@ const form = reactive<RegisterForm>({
 })
 
 const apiError = ref<string | null>(null)
-const apiMessage = ref<string | null>(null)
 
 const fieldErrors = ref<{
   email?: string
@@ -66,26 +66,12 @@ const fieldErrors = ref<{
 }>({})
 const submitting = ref(false)
 
-function validate(): boolean {
-  const parsed = registerSchema.safeParse(form)
-  if (parsed.success) {
-    fieldErrors.value = {}
-    return true
-  }
-  // Map first error per field
-  const errs: typeof fieldErrors.value = {}
-  for (const issue of parsed.error.issues) {
-    const key = issue.path[0] as keyof RegisterForm | undefined
-    if (key && !errs[key]) {
-      errs[key] = issue.message
-    }
-  }
-  fieldErrors.value = errs
-  return false
+function validateForm(): boolean {
+  return validate<RegisterForm>(registerSchema, form, fieldErrors)
 }
 
 async function onSubmit() {
-  if (!validate()) return
+  if (!validateForm()) return
   submitting.value = true
   apiError.value = null
   try {
