@@ -28,7 +28,7 @@ public class TablePlanSessionStore : IPlanSessionStore
                 {
                     SessionKey = entity.RowKey,
                     HouseholdKey = entity.HouseholdKey,
-                    MenuSelection = JsonDocument.Parse(entity.StartIngredients)
+                    MenuSelection = JsonDocument.Parse(entity.Menus)
                 };
             }
         }
