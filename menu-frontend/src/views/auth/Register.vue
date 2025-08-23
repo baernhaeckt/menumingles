@@ -5,6 +5,9 @@ import { useHead } from '@unhead/vue'
 import { z } from 'zod'
 import { httpClient } from '@/client/http-client.ts'
 import { validate } from '@/forms/validation.ts'
+import { useToast } from 'vue-toast-notification'
+import router from '@/router'
+import { getErrorMessage } from '@/schemas/backend-error.ts'
 
 const route = useRoute()
 const hasInvite = computed(() => !!route.query.householdInviteCode)
@@ -75,17 +78,21 @@ async function onSubmit() {
   submitting.value = true
   apiError.value = null
   try {
+    const toast = useToast()
+
     const payload: Record<string, unknown> = {
       email: form.email.trim(),
       username: form.username.trim(),
       password: form.password,
+      household: !route.query.householdInviteCode ? form.householdName.trim() : null,
+      householdKey: route.query.householdInviteCode ? (route.query.householdInviteCode as string) : null,
     }
-    const invite = route.query.householdInviteCode
-    if (invite) payload.householdInviteCode = invite
 
-    await httpClient.post('/v1/auth/register', payload)
+    await httpClient.post('/v1/auth/register', payload);
+    toast.success('<i class="ti ti-circle-check-filled"></i> Successfully registered. Please login to continue.');
+    await router.push({ name: 'login' })
   } catch (e: any) {
-    apiError.value = 'Unable to register. Please try again later.'
+    apiError.value = getErrorMessage(e);
   } finally {
     submitting.value = false
   }

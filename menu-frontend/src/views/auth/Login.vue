@@ -66,7 +66,7 @@ async function onSubmit() {
 
     const response = await httpClient.post<string>('/v1/auth/login', payload)
     loginWithToken(response.data)
-    toast.success('Logged in successfully')
+    toast.success('<i class="ti ti-circle-check-filled"></i> Logged in successfully');
     await router.push({ name: 'home' })
   } catch (error) {
     apiError.value = getErrorMessage(error)
