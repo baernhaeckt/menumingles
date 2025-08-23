@@ -8,12 +8,12 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace backend.Services;
 
-public class JwtService : IJwtFactory
+public class JwtFactory : IJwtFactory
 {
     private readonly IConfiguration _configuration;
     private readonly SymmetricSecurityKey _key;
 
-    public JwtService(IConfiguration configuration)
+    public JwtFactory(IConfiguration configuration)
     {
         _configuration = configuration;
         var jwtKey = _configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key not configured");

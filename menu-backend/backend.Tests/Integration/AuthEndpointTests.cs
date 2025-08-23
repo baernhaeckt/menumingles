@@ -1,8 +1,6 @@
 
 using backend.Api.Models;
 
-using Microsoft.AspNetCore.Mvc.Testing;
-
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
@@ -12,10 +10,10 @@ namespace backend.Tests.Integration;
 [TestClass]
 public class AuthEndpointTests
 {
-    private WebApplicationFactory<Program> _factory = null!;
+    private CustomWebApplicationFactory<Program> _factory = null!;
 
     [TestInitialize]
-    public void Setup() => _factory = new WebApplicationFactory<Program>();
+    public void Setup() => _factory = new CustomWebApplicationFactory<Program>();
 
     [TestCleanup]
     public void Cleanup() => _factory?.Dispose();
@@ -43,9 +41,16 @@ public class AuthEndpointTests
     {
         // Arrange
         var client = _factory.CreateClient();
+        var response1 = await client.PostAsJsonAsync("/api/v1/auth/register", new RegisterRequest()
+        {
+            Username = "testuser",
+            Email = "tester@test.ch",
+            Password = "Test123"
+        });
+        response1.EnsureSuccessStatusCode();
 
         // Act
-        var response = await client.PostAsJsonAsync("/api/v1/auth/login", new RegisterRequest()
+        var response2 = await client.PostAsJsonAsync("/api/v1/auth/login", new RegisterRequest()
         {
             Username = "testuser",
             Email = "tester@test.ch",
@@ -53,8 +58,8 @@ public class AuthEndpointTests
         });
 
         // Assert
-        string token = await response.Content.ReadAsStringAsync();
-        Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+        string token = await response2.Content.ReadAsStringAsync();
+        Assert.AreEqual(HttpStatusCode.OK, response2.StatusCode);
     }
 
     [TestMethod]
@@ -62,6 +67,12 @@ public class AuthEndpointTests
     {
         // Arrange
         var client = _factory.CreateClient();
+        var response1 = await client.PostAsJsonAsync("/api/v1/auth/register", new RegisterRequest()
+        {
+            Username = "testuser",
+            Email = "tester@test.ch",
+            Password = "Test123"
+        });
 
         // Act
         var response = await client.PostAsJsonAsync("/api/v1/auth/login", new RegisterRequest()
@@ -71,6 +82,7 @@ public class AuthEndpointTests
             Password = "Test123"
         });
         string token = await response.Content.ReadAsStringAsync();
+        token = token.Replace("\"", "");
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         var meResponse = await client.GetAsync("/api/v1/auth/me");
 

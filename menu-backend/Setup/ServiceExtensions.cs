@@ -40,7 +40,7 @@ public static class ServiceExtensions
         builder.Services.AddAuthorization();
 
         // Add services
-        builder.Services.AddScoped<IJwtFactory, JwtService>();
+        builder.Services.AddScoped<IJwtFactory, JwtFactory>();
         builder.Services.AddSingleton<IUserStore, TableUserStore>();
         builder.Services.AddSingleton<TableServiceClient>(_ =>
         {

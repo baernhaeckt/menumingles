@@ -1,13 +1,12 @@
 ﻿using backend.Api.Models;
 
-namespace backend.Storage
+namespace backend.Storage;
+
+public interface IUserStore
 {
-    public interface IUserStore
-    {
-        Task<User?> FindByUsernameAsync(string username);
+    Task<User?> FindByUsernameAsync(string username);
 
-        Task SaveAsync(User user, string password);
+    Task SaveAsync(User user, string password);
 
-        Task<User?> VerifyPassword(string username, string password);
-    }
+    Task<User?> VerifyPassword(string username, string password);
 }
