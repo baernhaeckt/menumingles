@@ -30,7 +30,7 @@ class RecommenderService:
 
         return recipe_recommendations
 
-    def get_recommendations(self, ingredients: list[str], top_k=3) -> list:
+    def get_recommendations(self, ingredients: list[str], top_k) -> list:
         # Create query embedding
         query_recipe_ingredients = [self.ingredient_vocab[i] for i in ingredients]
 

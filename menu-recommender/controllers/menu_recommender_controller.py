@@ -7,9 +7,9 @@ router = APIRouter()
 
 
 @router.post("/recommender", tags=["api menu recommender"], status_code=200)
-def inventory_recommender(request: Request, ingredients: list[str]):
+def inventory_recommender(request: Request, ingredients: list[str], top_k: int = 3) -> JSONResponse:
     recommender_service = request.app.state.recommender_service
-    top_k_recipes = recommender_service.get_recommendations(ingredients)
+    top_k_recipes = recommender_service.get_recommendations(ingredients, top_k)
 
     return JSONResponse(status_code=200, content=top_k_recipes)
 
