@@ -47,7 +47,7 @@ useHead({
     <div class="bg-neutral-200 rounded-2xl p-5 mb-5">
       <h2 class="font-poetsen-one text-xl mb-3">Invite new people</h2>
 
-      <div class="flex flex-row flex-nowrap gap-5">
+      <div class="flex flex-col md:flex-row flex-nowrap gap-5">
         <!-- do not stretch button -->
         <div>
           <p class="text-neutral-500 mb-2">
@@ -65,6 +65,7 @@ useHead({
 
         <div class="p-3 bg-white rounded-2xl">
           <qrcode-svg
+            class="mx-auto md:mx-0"
             value="https://menu-mingles-frontend-cccnfba0ezc2dhbc.northeurope-01.azurewebsites.net/auth/register?householdInviteCode=23892"
             level="H"
             :size="250"
