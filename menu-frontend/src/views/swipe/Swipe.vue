@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import '@interactjs/auto-start'
 import '@interactjs/actions/drag'
+import '@interactjs/actions/drop'
 import '@interactjs/actions/resize'
 import '@interactjs/modifiers'
 import '@interactjs/dev-tools'
+import "@interactjs/inertia"
 import interact from '@interactjs/interact'
 
 function onSwipeLeft() {
@@ -35,6 +37,13 @@ function animateTo(el: HTMLElement, x: number) {
 
 interact('.item').draggable({
   lockAxis: 'x',
+  inertia: {
+    // lower resistance = longer glide
+    resistance: 15,     // default ~20; try 5–15 for more momentum
+    minSpeed: 100,      // px/s needed to trigger inertia (raise to require a "flick")
+    endSpeed: 20,       // px/s where inertia stops
+    allowResume: true,  // let users grab the card again mid-inertia
+  },
   listeners: {
     start(event) {
       const target = event.target as HTMLElement
