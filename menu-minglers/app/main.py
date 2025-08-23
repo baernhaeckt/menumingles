@@ -1,17 +1,14 @@
 """FastAPI application entry point."""
 
-import asyncio
 from contextlib import asynccontextmanager
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 
 from app.api.v1.router import api_router
 from app.config import settings
 from app.core.logging import log_exception_handler, logger
-from app.services.websocket_service import WebSocketService
 
 load_dotenv()
 
@@ -51,29 +48,12 @@ async def lifespan(app: FastAPI):
     # Startup
     logger.log_info("Starting Menu Minglers application...")
 
-    # Initialize WebSocket service
-    websocket_service = WebSocketService.get_instance()
-    websocket_service.initialize_server(host="localhost", port=8765)
-
-    # Start WebSocket server in background task
-    websocket_task = asyncio.create_task(websocket_service.start_server())
-
     logger.log_info("Application startup complete")
 
     yield
 
     # Shutdown
     logger.log_info("Shutting down Menu Minglers application...")
-
-    # Stop WebSocket server
-    if websocket_service.is_initialized():
-        await websocket_service.stop_server()
-        websocket_task.cancel()
-        try:
-            await websocket_task
-        except asyncio.CancelledError:
-            pass
-
     logger.log_info("Application shutdown complete")
 
 
@@ -88,10 +68,17 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://localhost:8000",
+    "https://menu-mingles-minglers-brcebbdfb5cefdh8.northeurope-01.azurewebsites.net",
+    "https://menu-mingles-frontend-cccnfba0ezc2dhbc.northeurope-01.azurewebsites.net",
+]
+
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure this properly for production
+    allow_origins=ALLOWED_ORIGINS,  # Configure this properly for production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
