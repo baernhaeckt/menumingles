@@ -154,7 +154,11 @@ const manualReconnect = async () => {
   }
 };
 
-const formatTime = (timestamp: number) => {
+const formatTime = (timestamp: number | undefined) => {
+  if (!timestamp) {
+    return '';
+  }
+
   const date = new Date(timestamp);
   const now = new Date();
   const isToday = date.toDateString() === now.toDateString();
