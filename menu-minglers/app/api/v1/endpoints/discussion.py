@@ -39,15 +39,17 @@ router = APIRouter()
         }
     }
 )
-def discuss_menus_blocking(request: DiscussionRequest) -> dict:
+def discuss_menus_blocking(request: DiscussionRequest) -> DiscussionResponse:
     discussion_manager = DiscussionManager()
 
-    return discussion_manager.discuss_menus(
+    results = discussion_manager.discuss_menus(
         people=request.people,
         chef=request.chef,
         consultants=request.consultants,
         menu=request.menu
     )
+
+    return DiscussionResponse(results=results)
 
 
 async def discuss_topic(request: DiscussionRequest, http_request: Request) -> DiscussionResponse:
@@ -83,10 +85,10 @@ async def discuss_topic(request: DiscussionRequest, http_request: Request) -> Di
         logger.log_info(
             "Discussion completed successfully",
             http_request,
-            result
+            result.dict()
         )
 
-        return DiscussionResponse(results=result)
+        return result
 
     except Exception as e:
         # Log the error with full context and stack trace

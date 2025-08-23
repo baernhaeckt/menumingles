@@ -17,7 +17,6 @@ class DiscussionManager:
     situation = """
 You are a focused group chat that discusses the menu for the next week for all the people in the group.
 The menu is a list of dishes with the ingredients for each day.
-The menu is a list of dishes with the ingredients for each day.
 """
 
     menu_description_template = """
@@ -26,19 +25,19 @@ The menu is a list of dishes with the ingredients for each day.
 """
 
     task = """
-Be brief and utilitarian. Answer in a single sentence or as short as possible.Think about the menu and the ingredients for each day. Tell if you like the dish or not. If you dislike a dish or an ingredient, tell the chef {chef_name}.
+Be brief and utilitarian, concise and answer directly. Answer in one to three sentences. Think about the menu and the ingredients for each day. Tell if you like the dish or not. Do not tell things that others already know or said. Always give feedback about all dishes and ingredients in one message.
 """
 
     chef_thoughts = """
-I am the chef and I am responsible for the menu. I will make the final decision for delicous dishes. I am able to switch ingredients based on the wishes of the group and the suggestions of the consultants.
+I am the chef and I am responsible for the menu. I will make the final decision for delicous dishes. I am able to switch ingredients based on the wishes of the group and the suggestions of the consultants. I do not discuss about my personal like or dislike of the dishes and their ingredients, but only about my professional opinion about the ingredients.
 """
 
     consultant_thoughts = """
-I am a consultant and I am here to help in my specific field. I am able to suggest ingredients based on the wishes of the group and the suggestions of the chef.
+I am a consultant and I am here to help in my specific field. I am able to suggest ingredients based on the wishes of the group and the suggestions of the chef. I do not discuss about my personal like or dislike of the dishes and their ingredients, but only about my professional opinion about the ingredients.
 """
 
     extraction_objective = """
-Extract the final weekly menu (one menu per day) as a SINGLE JSON object with EXACTLY this schema and nothing else:
+Quickly extract the final weekly menu (one menu per day) as a SINGLE JSON object with EXACTLY this schema and nothing else:
 {
     "monday": {
         "name": "The name of the dish for Monday",
@@ -122,7 +121,10 @@ Extract the final weekly menu (one menu per day) as a SINGLE JSON object with EX
 
             # Create focus group
             logger.log_debug("Creating focus group")
-            focus_group = TinyWorld("Group chat for menu discussion", persons)
+            focus_group = TinyWorld(
+                "Group chat for menu discussion",
+                persons
+            )
             logger.log_info("Focus group created successfully")
 
             # Create websocket logger
@@ -163,19 +165,17 @@ Extract the final weekly menu (one menu per day) as a SINGLE JSON object with EX
 
             # Broadcast final decision request
             final_decision_message = """
-Make the final decision for the menu and tell the group what dishes you have chosen with all the ingredients.
-Incorporate all requests from the group and the suggestions from the consultants.
-If there are too few dishes, create more dishes with their ingredients and tell the group what dishes you have chosen with all the ingredients.
-Ensure that each day has exactly one dish.
+Make the final decision for the weekly menu. Announce exactly which dishes are chosen for each day of the week, including their full list of ingredients.
 
-Constraints:
-- Each day must have exactly one dish.
-- There are no days with null dishes. Empty dishes are strictly not allowed.
-- Ensure that until all days are covered, you use the existing dishes as much as possible (but never duplicate dishes).
-- Ensure that all dishes are unique. No duplicate dishes are allowed.
-- When you create more dishes, ensure that they are unique and different from the existing dishes.
-- Ensure to include the opinions of the group and the consultants in the final decision for both the dishes and the ingredients.
-- If requested, find replacements for ingredients that are not wanted or not seasonally available.
+Rules:
+
+* Respect all requests and preferences expressed by the group and the consultants.
+* Each day must have exactly one dish. No day may remain empty or contain a placeholder.
+* Use existing proposed dishes whenever possible, but do not repeat the same dish.
+* If there are not enough dishes, create new ones. New dishes must be unique, clearly different from the existing ones, and include complete ingredient lists.
+* Ensure the final menu contains only unique dishes—no duplicates.
+* Replace any ingredients that the group rejected or that are not seasonally available with suitable alternatives.
+* Do not overthink or add commentary. Deliver the final, concrete list of dishes with ingredients, covering all days.
 """
             logger.log_debug("Broadcasting final decision request")
             focus_group.broadcast(final_decision_message)
