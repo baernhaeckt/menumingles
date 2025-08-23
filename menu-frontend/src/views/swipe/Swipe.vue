@@ -14,6 +14,7 @@ import { useAuthStore } from '@/stores/auth.ts'
 import { API_IMAGE_GEN_URL } from '@/constants.ts'
 import { useToast } from 'vue-toast-notification'
 import CustomImage from '@/components/CustomImage.vue'
+import ThanksSwiping from '@/components/ThanksSwiping.vue'
 
 function onSwipeLeft() {
   const currentCard = getCurrentCard()
@@ -90,6 +91,7 @@ async function finishSwipingAsync() {
       .flatMap((name) => name),
   });
 
+  swipingFinished.value = true;
   toast.success('<i class="ti ti-circle-check-filled"></i> Thank you for swiping');
 }
 
@@ -119,6 +121,7 @@ onMounted(async () => {
 })
 
 const cards = ref<{ id: number; names: string[]; ingredients: string[] }[]>([])
+const swipingFinished = ref(false)
 const menuDecisions = ref<{ id: number; name: string[]; like: boolean }[]>([])
 
 const topIndex = computed(() => cards.value.length - 1)
@@ -241,7 +244,7 @@ function getImage(name: string) {
 </script>
 
 <template>
-  <div class="grow pt-6 flex flex-col">
+  <div v-if="cards.length > 0" class="grow pt-6 flex flex-col">
     <div class="grow h-full w-full relative overflow-hidden" ref="deck">
       <div
         v-for="(card, i) in cards"
@@ -281,7 +284,7 @@ function getImage(name: string) {
       </div>
     </div>
   </div>
-  <div class="p-10 py-6 flex flex-row justify-between">
+  <div v-if="cards.length > 0" class="p-10 py-6 flex flex-row justify-between">
     <button
       @click="swipeByButton('left')"
       class="bg-red-600 hover:bg-red-700 cursor-pointer rounded-full aspect-square h-16 text-white flex items-center justify-center outline-4 outline-transparent outline-solid outline-offset-2 focus-visible:outline-red-200"
@@ -295,6 +298,8 @@ function getImage(name: string) {
       <i class="ti ti-heart-filled text-4xl"></i>
     </button>
   </div>
+
+  <ThanksSwiping v-if="cards.length === 0 && swipingFinished" />
 </template>
 
 <style>
