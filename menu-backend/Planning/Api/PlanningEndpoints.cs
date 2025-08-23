@@ -3,33 +3,30 @@ using backend.Planning.Storage;
 
 using Microsoft.AspNetCore.Mvc;
 
+using System.Security.Claims;
+
 namespace backend.Planning.Api;
 
 public static class PlanningEndpoints
 {
     public static void RegisterPlanningEndpoints(this IEndpointRouteBuilder routes)
     {
-        var auth = routes.MapGroup("/api/v1/planning");
+        var plan = routes.MapGroup("/api/v1/planning");
 
         // Start planning session endpoint
-        auth.MapPost("/start", async (
+        plan.MapPost("/start", async (
             [FromBody] PlanningStartRequest request,
             IPlanSessionStore planSessionStore,
-            RecommenderClient recommenderClient) =>
+            RecommenderClient recommenderClient,
+            ClaimsPrincipal user) =>
         {
             var result = await recommenderClient.RecommendAsync(request.Ingredients);
-            return Results.Ok(result);
+            string sessionKey = await planSessionStore.StartSessionAsync(user.GetHouseholdKey(), request.Ingredients, result.RootElement.GetRawText());
+            return Results.Ok(sessionKey);
         })
         .WithName("Start")
         .WithOpenApi()
-        .WithTags("Plan");
-
+        .WithTags("Plan")
+        .RequireAuthorization();
     }
-}
-
-public class PlanningStartRequest
-{
-    public string HouseholdKey { get; set; }
-
-    public IEnumerable<string> Ingredients { get; set; }
 }

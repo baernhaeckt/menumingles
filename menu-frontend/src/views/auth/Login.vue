@@ -6,6 +6,10 @@ import { reactive, ref } from 'vue'
 import { validate } from '@/forms/validation.ts'
 import { httpClient } from '@/client/http-client.ts'
 import { getErrorMessage } from '@/schemas/backend-error.ts'
+import { useCookies } from '@vueuse/integrations/useCookies'
+import { useToast } from 'vue-toast-notification'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth.ts'
 
 useHead({
   title: 'Login • Menu Mingles',
@@ -20,7 +24,9 @@ useHead({
       rel: 'icon',
     },
   ],
-})
+});
+
+const router = useRouter();
 
 const loginSchema = z.object({
   username: z.string().trim().min(1, 'Username is required'),
@@ -45,6 +51,8 @@ function validateForm(): boolean {
   return validate<RegisterForm>(loginSchema, form, fieldErrors)
 }
 
+const { loginWithToken } = useAuthStore();
+
 async function onSubmit() {
   if (!validateForm()) return
   submitting.value = true
@@ -54,8 +62,12 @@ async function onSubmit() {
       username: form.username.trim(),
       password: form.password,
     }
+    const toast = useToast();
 
-    await httpClient.post('/v1/auth/login', payload)
+    const response = await httpClient.post<string>('/v1/auth/login', payload);
+    loginWithToken(response.data);
+    toast.success('Logged in successfully');
+    await router.push({ name: 'home' });
   } catch (error) {
     apiError.value = getErrorMessage(error);
   } finally {
