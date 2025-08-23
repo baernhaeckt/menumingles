@@ -12,15 +12,17 @@ public class TablePlanSessionStore : IPlanSessionStore
         _table.CreateIfNotExists();
     }
 
-    public void StartSession(string householdKey, IEnumerable<string> startIngredients)
+    public async Task<string> StartSessionAsync(string householdKey, IEnumerable<string> startIngredients, string menus)
     {
-        TableEntity entity = new(householdKey, Guid.NewGuid().ToString())
+        SessionEntity entity = new()
         {
-            { "StartTime", DateTime.UtcNow },
-            { "IsActive", true }
+            PartitionKey = householdKey,
+            RowKey = Guid.NewGuid().ToString(),
+            StartIngredients = string.Join(',', startIngredients),
+            Menus = menus,
+            CreatedAt = DateTimeOffset.UtcNow
         };
-        _table.AddEntity(entity);
+        await _table.AddEntityAsync(entity);
+        return entity.RowKey;
     }
-
-
 }

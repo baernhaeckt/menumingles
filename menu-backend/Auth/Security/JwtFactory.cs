@@ -27,7 +27,9 @@ public class JwtFactory : IJwtFactory
         {
             new Claim(ClaimTypes.NameIdentifier, user.Username),
             new Claim(ClaimTypes.Name, user.Username),
-            new Claim(ClaimTypes.Email, user.Email)
+            new Claim(ClaimTypes.Email, user.Email),
+            new Claim(MenuMinglesClaims.Household, user.Household),
+            new Claim(MenuMinglesClaims.HouseholdKey, user.HouseholdKey)
         };
 
         var tokenDescriptor = new SecurityTokenDescriptor
