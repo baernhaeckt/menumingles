@@ -8,5 +8,5 @@ public interface IPlanSessionStore
 
     Task<Session> GetSessionAsync(string householdKey);
 
-    Task StoreSessionSelectionAsync(string sessionKey, string householdKey, JsonDocument matchedMenus);
+    Task StoreSessionSelectionAsync(string sessionKey, string householdKey, IEnumerable<string> matchedMenus);
 }

@@ -8,5 +8,7 @@ public class Session
 
     public string HouseholdKey { get; set; }
 
+    public IEnumerable<string> MatchedMenus { get; set; }
+
     public JsonDocument MenuSelection { get; set; }
 }
