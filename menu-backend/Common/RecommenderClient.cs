@@ -26,9 +26,9 @@ public class RecommenderClient
     /// POST /api/v1/menu/recommender – Inventory Recommender
     /// </summary>
     /// <param name="ingredients">Array of ingredient strings</param>
-    public async Task<JsonDocument?> RecommendAsync(IEnumerable<string> ingredients, CancellationToken ct = default)
+    public async Task<JsonDocument?> RecommendAsync(IEnumerable<string> ingredients, int amount, CancellationToken ct = default)
     {
-        var response = await _http.PostAsJsonAsync("/api/v1/menu/recommender", ingredients, ct);
+        var response = await _http.PostAsJsonAsync($"/api/v1/menu/recommender?top_k={amount}", ingredients, ct);
 
         if (response.StatusCode == System.Net.HttpStatusCode.UnprocessableEntity)
         {
@@ -43,9 +43,9 @@ public class RecommenderClient
     /// <summary>
     /// GET /api/v1/menu/menusampler – Next Menu Sampler
     /// </summary>
-    public async Task<JsonDocument?> GetMenuSamplerAsync(int number, CancellationToken ct = default)
+    public async Task<JsonDocument?> GetMenuSamplerAsync(int amount, CancellationToken ct = default)
     {
-        var response = await _http.GetAsync($"/api/v1/menu/menusampler?top_k={number}", ct);
+        var response = await _http.GetAsync($"/api/v1/menu/menusampler?top_k={amount}", ct);
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<JsonDocument>(cancellationToken: ct);
     }
