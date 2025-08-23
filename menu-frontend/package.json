@@ -19,6 +19,7 @@
     "@tabler/icons-webfont": "^3.34.1",
     "@tailwindcss/vite": "^4.1.12",
     "@tsparticles/vue3": "^3.0.1",
+    "@unhead/vue": "^2.0.14",
     "pinia": "^3.0.3",
     "qrcode.vue": "^3.6.0",
     "tailwindcss": "^4.1.12",

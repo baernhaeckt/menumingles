@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { QrcodeSvg } from 'qrcode.vue'
 import { useToast } from 'vue-toast-notification'
+import { useHead } from '@unhead/vue'
 
 const copyInviteLink = async () => {
   await navigator.clipboard.writeText(
@@ -10,6 +11,21 @@ const copyInviteLink = async () => {
   const $toast = useToast()
   $toast.success('<i class="ti ti-circle-check-filled"></i> Invite link copied to clipboard')
 }
+
+useHead({
+  title: 'Profile • Menu Mingles',
+  meta: [
+    {
+      name: 'description',
+      content: 'Manage your account and household settings',
+    },
+  ],
+  link: [
+    {
+      rel: 'icon',
+    }
+  ]
+})
 </script>
 
 <template>

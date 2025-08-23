@@ -1,4 +1,20 @@
 <script setup lang="ts">
+import { useHead } from '@unhead/vue'
+
+useHead({
+  title: 'Home • Menu Mingles',
+  meta: [
+    {
+      name: 'description',
+      content: 'Welcome to Menu Mingles',
+    },
+  ],
+  link: [
+    {
+      rel: 'icon',
+    },
+  ],
+})
 </script>
 
 <template>

@@ -1,9 +1,23 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
+import { useHead } from '@unhead/vue'
 
 const route = useRoute()
 const hasInvite = computed(() => !!route.query.householdInviteCode)
+
+useHead({
+  title: hasInvite.value ? 'Accept invitation • Menu Mingles' : 'Register • Menu Mingles',
+  meta: [
+    {
+      name: 'description',
+      content: hasInvite.value
+        ? 'Accept the invitation to join your household'
+        : 'Create a new account to start your own household',
+    },
+  ],
+  link: []
+})
 
 const particleConfig = {
   fullScreen: {

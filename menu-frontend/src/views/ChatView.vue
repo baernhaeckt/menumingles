@@ -1,5 +1,21 @@
 <script setup lang="ts">
   import { IconUser, IconFridge, IconSend } from "@tabler/icons-vue";
+  import { useHead } from '@unhead/vue'
+
+  useHead({
+    title: 'Chat • Menu Mingles',
+    meta: [
+      {
+        name: 'description',
+        content: 'Chat with your household members',
+      },
+    ],
+    link: [
+      {
+        rel: 'icon',
+      }
+    ]
+  })
 </script>
 
 <template>
