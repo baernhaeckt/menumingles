@@ -1,6 +1,6 @@
-using backend.Api.Models;
+using backend.Auth.Api;
 
-namespace backend.Services;
+namespace backend.Auth.Security;
 
 public interface IJwtFactory
 {

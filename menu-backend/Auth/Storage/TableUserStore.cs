@@ -1,8 +1,8 @@
-﻿namespace backend.Storage;
+﻿namespace backend.Auth.Storage;
 
 using Azure.Data.Tables;
 
-using backend.Api.Models;
+using backend.Auth.Api;
 
 using System.Security.Cryptography;
 

@@ -1,16 +1,12 @@
-namespace backend.Setup;
+namespace backend;
 
-public static class MiddlewareExtensions
+public static class InfrastructureMiddlewares
 {
     public static void RegisterMiddlewares(this WebApplication app)
     {
         // Add Docs
         app.UseSwagger();
-        app.UseSwaggerUI(c =>
-        {
-            c.SwaggerEndpoint("/swagger/v1/swagger.json", "MenuMingles API");
-            c.RoutePrefix = "docs";
-        });
+        app.UseSwaggerUI();
 
         // Enforece HTTPS
         app.UseHttpsRedirection();

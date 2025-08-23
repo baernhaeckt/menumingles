@@ -1,10 +1,9 @@
-using backend.Api.Models;
-using backend.Services;
-using backend.Storage;
+using backend.Auth.Security;
+using backend.Auth.Storage;
 
 using Microsoft.AspNetCore.Mvc;
 
-namespace backend.Api.Endpoints;
+namespace backend.Auth.Api;
 
 public static class AuthEndpoints
 {

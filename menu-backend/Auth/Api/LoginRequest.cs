@@ -1,4 +1,4 @@
-namespace backend.Api.Models;
+namespace backend.Auth.Api;
 
 public class LoginRequest
 {

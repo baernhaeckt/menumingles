@@ -1,7 +1,7 @@
 ﻿using System.Collections.Concurrent;
 
-using backend.Api.Models;
-using backend.Storage;
+using backend.Auth.Api;
+using backend.Auth.Storage;
 
 namespace backend.Tests.Integration;
 

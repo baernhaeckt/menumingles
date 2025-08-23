@@ -2,11 +2,11 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-using backend.Api.Models;
+using backend.Auth.Api;
 
 using Microsoft.IdentityModel.Tokens;
 
-namespace backend.Services;
+namespace backend.Auth.Security;
 
 public class JwtFactory : IJwtFactory
 {

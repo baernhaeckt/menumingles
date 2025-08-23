@@ -1,18 +1,15 @@
-using Azure.Data.Tables;
-
-using backend.Services;
-using backend.Storage;
+using backend.Common;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
 using System.Text;
 
-namespace backend.Setup;
+namespace backend;
 
-public static class ServiceExtensions
+public static class InfrastructureRegistrations
 {
-    public static void RegisterServices(this WebApplicationBuilder builder)
+    public static void RegisterInfrastructureServices(this WebApplicationBuilder builder)
     {
         // Add JWT Authentication
         builder.Services.AddAuthentication(options =>
@@ -49,13 +46,9 @@ public static class ServiceExtensions
         // Add authorization
         builder.Services.AddAuthorization();
 
-        // Add services
-        builder.Services.AddScoped<IJwtFactory, JwtFactory>();
-        builder.Services.AddSingleton<IUserStore, TableUserStore>();
-        builder.Services.AddSingleton<TableServiceClient>(_ =>
+        builder.Services.AddHttpClient<RecommenderClient>(c =>
         {
-            var conn = builder.Configuration.GetConnectionString("TableStorage");
-            return new TableServiceClient(conn);
+            c.BaseAddress = new Uri("https://menu-mingles-recommender-dacue6bacweac5es.northeurope-01.azurewebsites.net");
         });
 
         // Add OpenAPI and Swagger

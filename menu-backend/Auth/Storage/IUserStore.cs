@@ -1,6 +1,6 @@
-﻿using backend.Api.Models;
+﻿using backend.Auth.Api;
 
-namespace backend.Storage;
+namespace backend.Auth.Storage;
 
 public interface IUserStore
 {

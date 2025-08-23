@@ -1,10 +1,17 @@
-using backend.Api.Endpoints;
-using backend.Setup;
+using backend;
+using backend.Auth;
+using backend.Auth.Api;
+using backend.Planning;
+using backend.Planning.Api;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Register all services
-builder.RegisterServices();
+builder.RegisterInfrastructureServices();
+
+// Register all features
+builder.RegisterAuthServices();
+builder.RegisterPlanningServices();
 
 var app = builder.Build();
 
@@ -13,6 +20,7 @@ app.RegisterMiddlewares();
 
 // Register all endpoints
 app.RegisterAuthEndpoints();
+app.RegisterPlanningEndpoints();
 
 // Health check endpoint
 app.MapGet("/health", () =>

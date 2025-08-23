@@ -1,4 +1,4 @@
-﻿using backend.Storage;
+﻿using backend.Auth.Storage;
 
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;

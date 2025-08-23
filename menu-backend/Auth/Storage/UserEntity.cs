@@ -1,4 +1,4 @@
-﻿namespace backend.Storage;
+﻿namespace backend.Auth.Storage;
 
 using Azure;
 using Azure.Data.Tables;
