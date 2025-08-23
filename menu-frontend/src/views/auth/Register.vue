@@ -178,14 +178,14 @@ const particleConfig = {
     />
 
     <div v-if="hasInvite">
-      <h1 class="text-center text-red-600 font-poetsen-one text-5xl mb-2">"WG Bern"</h1>
-      <h2 class="mb-12! text-center text-2xl text-neutral-500">
+      <h1 class="text-center text-red-600 font-poetsen-one text-3xl md:text-5xl mb-2">"WG Bern"</h1>
+      <h2 class="mb-12! text-center text-lg md:text-2xl text-neutral-500">
         You have been invited to this household.<br />Register an account to accept the invitation.
       </h2>
     </div>
     <div v-else>
-      <h1 class="text-center text-red-600 font-poetsen-one text-5xl mb-2">Register</h1>
-      <h2 class="mb-12! text-center text-2xl text-neutral-500">
+      <h1 class="text-center text-red-600 font-poetsen-one text-3xl md:text-5xl mb-2">Register</h1>
+      <h2 class="mb-12! text-center text-lg md:text-2xl text-neutral-500">
         You are creating a new household.<br />Register an account to start.
       </h2>
     </div>

@@ -5,8 +5,8 @@ import { IconLogin2 } from '@tabler/icons-vue'
 <template>
   <div class="block bg-white mt-10! p-5 py-12 md:py-24 mx-4 rounded-3xl">
     <img src="@/assets/illustrations/undraw_enter_nwx3.svg" alt="illustration" class="h-36 w-auto mx-auto mb-16" />
-    <h1 class="text-center text-red-600 font-poetsen-one text-5xl mb-2">Login</h1>
-    <h2 class="mb-12! text-center text-2xl text-neutral-500">Welcome back!</h2>
+    <h1 class="text-center text-red-600 font-poetsen-one text-3xl md:text-5xl mb-2">Login</h1>
+    <h2 class="mb-12! text-center text-lg md:text-2xl text-neutral-500">Welcome back!</h2>
 
     <div class="md:w-1/2! mx-auto mb-5">
       <label class="text-neutral-600" for="account-email"
