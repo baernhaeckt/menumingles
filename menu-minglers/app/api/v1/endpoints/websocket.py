@@ -52,17 +52,9 @@ async def websocket_endpoint(websocket: WebSocket):
                         "timestamp": time.time()
                     })
                 elif msg_type == "broadcast":
-                    await ws_service.broadcast_message({
-                        "type": "broadcast",
-                        "message": message_data.get("message", ""),
-                        "timestamp": time.time()
-                    })
+                    await ws_service.broadcast_message(message_data.get("data", ""))
                 else:
-                    await websocket.send_json({
-                        "type": "echo",
-                        "message": message_data,
-                        "timestamp": time.time()
-                    })
+                    await websocket.send_json(message_data.get("data", ""))
 
             except json.JSONDecodeError:
                 logger.info("Received plain text: %s", data)

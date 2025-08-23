@@ -93,9 +93,11 @@ const sendMessage = () => {
 
     // Create the message object
     const messageData = {
+      type: 'broadcast',
+      data: {
       name: currentUser,
-      message: newMessage.value.trim(),
-      timestamp: Date.now()
+        message: newMessage.value.trim()
+      }
     };
 
     // Send message via WebSocket
