@@ -4,17 +4,10 @@ import { useToast } from 'vue-toast-notification'
 import { useHead } from '@unhead/vue'
 import { useAuthStore } from '@/stores/auth.ts'
 import { useRouter } from 'vue-router'
+import { storeToRefs } from 'pinia'
+import { ref } from 'vue'
 
-const router = useRouter();
-
-const copyInviteLink = async () => {
-  await navigator.clipboard.writeText(
-    'https://menu-mingles-frontend-cccnfba0ezc2dhbc.northeurope-01.azurewebsites.net/auth/register?householdInviteCode=23892',
-  )
-
-  const toast = useToast()
-  toast.success('<i class="ti ti-circle-check-filled"></i> Invite link copied to clipboard')
-}
+const router = useRouter()
 
 useHead({
   title: 'Profile • Menu Mingles',
@@ -31,11 +24,23 @@ useHead({
   ],
 })
 
-const { user, getGravatarUrl, logout } = useAuthStore()
+const auth = useAuthStore()
+const { getGravatarUrl, householdKey, householdName, username } = storeToRefs(auth)
 
 function logoutAndRedirect() {
-  logout();
-  router.push({ name: 'home' });
+  auth.logout()
+  router.push({ name: 'home' })
+}
+
+const inviteLink = ref(
+  `https://menu-mingles-frontend-cccnfba0ezc2dhbc.northeurope-01.azurewebsites.net/auth/register?householdInviteCode=${householdKey.value}`,
+)
+
+const copyInviteLink = async () => {
+  await navigator.clipboard.writeText(inviteLink.value)
+
+  const toast = useToast()
+  toast.success('<i class="ti ti-circle-check-filled"></i> Invite link copied to clipboard')
 }
 </script>
 
@@ -49,9 +54,9 @@ function logoutAndRedirect() {
         class="w-24 h-24 rounded-full border-2 border-neutral-700"
       />
       <div>
-        <h1 class="text-3xl font-poetsen-one text-red-600">{{ user?.username }}</h1>
+        <h1 class="text-3xl font-poetsen-one text-red-600">{{ username }}</h1>
         <h1 class="text-lg text-neutral-600">
-          You're part of <span class="text-red-600">"WG Bern"</span>
+          You're part of <span class="text-red-600">"{{ householdName }}"</span>
         </h1>
       </div>
       <div class="ms-auto">
@@ -85,12 +90,7 @@ function logoutAndRedirect() {
         </div>
 
         <div class="p-3 bg-white rounded-2xl">
-          <qrcode-svg
-            class="mx-auto md:mx-0"
-            value="https://menu-mingles-frontend-cccnfba0ezc2dhbc.northeurope-01.azurewebsites.net/auth/register?householdInviteCode=23892"
-            level="H"
-            :size="250"
-          />
+          <qrcode-svg class="mx-auto md:mx-0" :value="inviteLink" level="H" :size="250" />
         </div>
       </div>
     </div>

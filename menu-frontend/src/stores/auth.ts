@@ -10,6 +10,8 @@ type JwtPayload = {
   nameid: string
   unique_name: string
   email: string
+  household: string
+  householdKey: string
   nbf: number
   exp: number
   iat: number
@@ -41,20 +43,28 @@ function parseJwt<T extends object = JwtPayload>(token: string): T | null {
   }
 }
 
-function getCookie(name: string): string | null {
-  const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'))
-  return match ? decodeURIComponent(match[2]) : null
+type User = { username?: string; email?: string, household: string, householdKey: string };
+
+function getUserFromPayload(payload: JwtPayload | null): User {
+  return {
+    username: (payload?.unique_name as string) || (payload?.nameid as string),
+    email: payload?.email,
+    household: payload?.household as string,
+    householdKey: payload?.householdKey as string,
+  };
 }
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     token: null as string | null,
-    user: null as { username?: string; email?: string } | null,
+    user: null as User | null
   }),
   getters: {
     isAuthenticated: (session) => !!session.token,
     username: (session) => session.user?.username,
     email: (session) => session.user?.email,
+    householdKey: (session) => session.user?.householdKey,
+    householdName: (session) => session.user?.household,
     getGravatarUrl: (session) => {
       const email = session.user?.email?.trim().toLowerCase();
       if (!email) return null;
@@ -73,18 +83,12 @@ export const useAuthStore = defineStore('auth', {
       }
       this.token = token
       const payload = parseJwt(token)
-      this.user = {
-        username: (payload?.unique_name as string) || (payload?.nameid as string),
-        email: payload?.email,
-      }
+      this.user = getUserFromPayload(payload);
     },
     loginWithToken(token: string) {
       this.token = token
       const payload = parseJwt(token)
-      this.user = {
-        username: (payload?.unique_name as string) || (payload?.nameid as string),
-        email: payload?.email,
-      }
+      this.user = getUserFromPayload(payload);
       const cookies = useCookies(['menu-session'])
       cookies.set('menu-session', encodeURIComponent(token), {
         sameSite: 'lax',
