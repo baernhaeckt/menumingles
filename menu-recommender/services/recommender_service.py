@@ -23,7 +23,7 @@ class RecommenderService:
             recipe = self.recipe_dataset.iloc[idx]
             recipe_recommendations.append(
                 {
-                    "title": recipe["title"],
+                    "name": recipe["title"],
                     "ingredients": recipe["NER"],
                 }
             )
