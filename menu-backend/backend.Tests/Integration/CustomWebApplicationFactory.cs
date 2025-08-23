@@ -3,7 +3,6 @@ using backend.Discussion.Storage;
 
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.AspNetCore.Session;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace backend.Tests.Integration;

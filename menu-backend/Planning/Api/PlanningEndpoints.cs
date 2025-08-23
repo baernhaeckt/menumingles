@@ -24,7 +24,7 @@ public static class PlanningEndpoints
             // We get from the ingredients we have from the fridge a recommendation for starting menus
             // Additionally, we get menu suggestions to sample the taste
             Task<JsonDocument?> fridgeIngredients = recommenderClient.RecommendAsync(request.Ingredients);
-            Task<JsonDocument?> menuSuggestions = recommenderClient.GetMenuSamplerAsync(9);
+            Task<JsonDocument?> menuSuggestions = recommenderClient.GetMenuSamplerAsync(12);
             await Task.WhenAll(fridgeIngredients, menuSuggestions);
             JsonDocument fridgeMenus = await fridgeIngredients;
             JsonDocument suggestionMenus = await menuSuggestions;
