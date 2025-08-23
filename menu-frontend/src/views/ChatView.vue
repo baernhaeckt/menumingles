@@ -39,6 +39,7 @@ const currentUserName = computed(() => {
 });
 
 const websocketClient = getWebSocketClient({
+  serverAddress: 'wss://menu-mingles-minglers-brcebbdfb5cefdh8.northeurope-01.azurewebsites.net/api/v1/ws', // TODO: configure this somewhere?
   onMessageReceived: (message) => {
     let parsedMessage: ZodSafeParseResult<ChatMessage>;
     if (message.data.type === 'echo') {
