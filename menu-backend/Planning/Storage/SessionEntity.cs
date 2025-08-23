@@ -9,7 +9,7 @@ public sealed class SessionEntity : ITableEntity
     // RowKey: username (or user id)
 
     public required string PartitionKey { get; set; } = default!; // householdkey
-    
+
     public required string RowKey { get; set; } = default!; // username
  
     public required string HouseholdKey { get; set; } = default!;
@@ -21,6 +21,8 @@ public sealed class SessionEntity : ITableEntity
     public required string StartIngredients { get; set; }
 
     public required string Menus { get; set; }
+
+    public string? MatchedMenus { get; set; }
 
     public required DateTimeOffset CreatedAt { get; set; }
 }

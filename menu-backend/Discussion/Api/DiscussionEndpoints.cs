@@ -5,6 +5,7 @@ using backend.Planning.Storage;
 using Microsoft.AspNetCore.Mvc;
 
 using System.Security.Claims;
+using System.Text.Json;
 
 namespace backend.Discussion.Api;
 
@@ -24,6 +25,12 @@ public static class DiscussionEndpoints
         {
             Household household = await householdStore.GetAsync(user.GetHouseholdKey());
             Session session = await sessionStore.GetSessionAsync(user.GetHouseholdKey());
+            JsonElement[] selectedMenus = session.MenuSelection.RootElement
+                .EnumerateArray()
+                .Where(
+                    x => session.MatchedMenus.Contains(x.GetProperty("name").GetString()))
+                .ToArray();
+
 
             CancellationTokenSource cancellationTokenSource = new();
             cancellationTokenSource.CancelAfter(TimeSpan.FromMinutes(5));
@@ -35,7 +42,7 @@ public static class DiscussionEndpoints
                household.People,
                 household.Chef!,
                 household.Consultants!,
-                session.MenuSelection), cancellationTokenSource.Token
+                selectedMenus), cancellationTokenSource.Token
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             )
             .ContinueWith(response =>

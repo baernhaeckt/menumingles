@@ -28,7 +28,8 @@ public class TablePlanSessionStore : IPlanSessionStore
                 {
                     SessionKey = entity.RowKey,
                     HouseholdKey = entity.HouseholdKey,
-                    MenuSelection = JsonDocument.Parse(entity.Menus)
+                    MenuSelection = JsonDocument.Parse(entity.Menus),
+                    MatchedMenus = JsonSerializer.Deserialize<IEnumerable<string>>(entity.MatchedMenus ?? "[]") ?? Array.Empty<string>(),
                 };
             }
         }
@@ -51,8 +52,8 @@ public class TablePlanSessionStore : IPlanSessionStore
         return entity.RowKey;
     }
 
-    public async Task StoreSessionSelectionAsync(string sessionKey, string householdKey, JsonDocument matchedMenus)
+    public async Task StoreSessionSelectionAsync(string sessionKey, string householdKey, IEnumerable<string> matchedMenus)
     {
-        await _table.UpdateEntityAsync(new SessionPartialForMatchUpdateEntity(sessionKey, householdKey, matchedMenus.RootElement.GetRawText()), ETag.All, TableUpdateMode.Merge);
+        await _table.UpdateEntityAsync(new SessionPartialForMatchUpdateEntity(sessionKey, householdKey, JsonSerializer.Serialize(matchedMenus)), ETag.All, TableUpdateMode.Merge);
     }
 }

@@ -34,7 +34,7 @@ public sealed record DiscussionRequest(
     JsonDocument People,
     JsonDocument Chef,
     JsonDocument Consultants,
-    JsonDocument Menu
+    JsonElement[] Menu
 );
 
 public sealed record DiscussionResponse(
