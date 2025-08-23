@@ -1,5 +1,21 @@
 <script setup lang="ts">
 import { IconLogin2 } from '@tabler/icons-vue'
+import { useHead } from '@unhead/vue'
+
+useHead({
+  title: 'Login • Menu Mingles',
+  meta: [
+    {
+      name: 'description',
+      content: 'Login to your account',
+    },
+  ],
+  link: [
+    {
+      rel: 'icon',
+    }
+  ]
+})
 </script>
 
 <template>
