@@ -6,7 +6,8 @@ import { z } from 'zod'
  */
 export const ChatMessageSchema = z.object({
   name: z.string(),
-  message: z.string()
+  message: z.string(),
+  timestamp: z.number().optional()
 })
 
 export type ChatMessage = z.infer<typeof ChatMessageSchema>

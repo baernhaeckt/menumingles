@@ -87,33 +87,16 @@ export class WebSocketClient {
         };
 
         this.socket.onmessage = (event) => {
-          // Handle pong messages
-          if (event.data === 'pong') {
-            this.handlePong();
-            return;
-          }
-
           try {
-            const message: WebSocketMessage = {
-              data: JSON.parse(event.data),
-              type: 'message',
-              timestamp: Date.now()
-            };
+            const payload = JSON.parse(event.data);
+            if (payload?.type === 'pong') { this.handlePong(); return; }
 
-            if (this.onMessageReceived) {
-              this.onMessageReceived(message);
-            }
-          } catch (error) {
-            // If JSON parsing fails, treat as raw text
-            const message: WebSocketMessage = {
-              data: event.data,
-              type: 'text',
-              timestamp: Date.now()
-            };
-
-            if (this.onMessageReceived) {
-              this.onMessageReceived(message);
-            }
+            const message: WebSocketMessage = { data: payload, type: 'message', timestamp: Date.now() };
+            this.onMessageReceived?.(message);
+          } catch {
+            if (event.data === 'pong') { this.handlePong(); return; } // fallback
+            const message: WebSocketMessage = { data: event.data, type: 'text', timestamp: Date.now() };
+            this.onMessageReceived?.(message);
           }
         };
 
@@ -224,18 +207,14 @@ export class WebSocketClient {
    */
   private startPingPong(): void {
     this.stopPingPong();
-
     this.pingTimer = setInterval(() => {
       if (this.socket && this.socket.readyState === WebSocket.OPEN) {
         try {
-          this.socket.send('ping');
-
-          // Set up pong timeout
+          if (this.pongTimer) { clearTimeout(this.pongTimer); this.pongTimer = null; }
+          this.socket.send(JSON.stringify({ type: 'ping' }));
           this.pongTimer = setTimeout(() => {
             console.warn('Ping timeout - connection may be stale');
-            if (this.socket) {
-              this.socket.close(1000, 'Ping timeout');
-            }
+            this.socket?.close(1000, 'Ping timeout');
           }, this.pingTimeout);
         } catch (error) {
           console.error('Failed to send ping:', error);
@@ -243,6 +222,7 @@ export class WebSocketClient {
       }
     }, this.pingInterval);
   }
+
 
   /**
    * Handle pong response

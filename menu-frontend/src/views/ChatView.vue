@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { getWebSocketClient } from "@/client/websocket-client";
 import { type ChatMessage, ChatMessageSchema } from "@/schemas/chat-message";
-import { IconFridge, IconSend, IconUser } from "@tabler/icons-vue";
+import { useAuthStore } from '@/stores/auth';
+import { IconFridge, IconRefresh, IconSend, IconUser } from "@tabler/icons-vue";
 import { useHead } from '@unhead/vue';
 
-import { onMounted, onUnmounted, ref } from 'vue';
+import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue';
 import { type ZodSafeParseResult } from "zod";
 
 useHead({
@@ -22,24 +23,37 @@ useHead({
   ]
 })
 
+const authStore = useAuthStore();
 const messages = ref<ChatMessage[]>([]);
 const newMessage = ref('');
 const connectionStatus = ref<'connecting' | 'connected' | 'disconnected' | 'error'>('disconnected');
 const reconnectAttempts = ref(0);
+const messagesContainer = ref<HTMLElement>();
+
+// Ensure auth store is initialized
+authStore.initFromCookie();
+
+// Computed property for current user name
+const currentUserName = computed(() => {
+  return authStore.username || 'User';
+});
 
 const websocketClient = getWebSocketClient({
-  serverAddress: 'wss://menu-mingles-minglers-brcebbdfb5cefdh8.northeurope-01.azurewebsites.net/api/v1/ws', // TODO: configure this somewhere?
   onMessageReceived: (message) => {
-    console.log('Received message:', message.data.original);
-
     let parsedMessage: ZodSafeParseResult<ChatMessage>;
-    if (message.data.original) {
-      parsedMessage = ChatMessageSchema.safeParse(message.data.original);
+    if (message.data.type === 'echo') {
+      parsedMessage = ChatMessageSchema.safeParse(message.data.message);
     } else {
       parsedMessage = ChatMessageSchema.safeParse(JSON.parse(message.data));
     }
     if (parsedMessage.success) {
+      // Enhance the message with the timestamp
+      parsedMessage.data.timestamp = message.timestamp;
       messages.value.push(parsedMessage.data);
+      // Auto-scroll to bottom when new message arrives
+      nextTick(() => {
+        scrollToBottom();
+      });
     }
   },
   onOpen: () => {
@@ -57,25 +71,42 @@ const websocketClient = getWebSocketClient({
   },
   autoReconnect: true,
   reconnectInterval: 3000,
-  maxReconnectAttempts: 15, // Increased from 5 to 15
-  pingInterval: 90000, // 90 seconds
-  pingTimeout: 90000 // 90 seconds
+  maxReconnectAttempts: 15,
+  pingInterval: 30000,
+  pingTimeout: 10000
 });
 
-// Monitor reconnection attempts
+const scrollToBottom = () => {
+  if (messagesContainer.value) {
+    messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight;
+  }
+};
+
 const checkReconnectionStatus = () => {
   reconnectAttempts.value = websocketClient.getReconnectAttempts();
 };
 
 const sendMessage = () => {
   if (newMessage.value.trim() && connectionStatus.value === 'connected') {
-    // Send message via WebSocket
-    websocketClient.send(JSON.stringify(ChatMessageSchema.parse({
-      name: 'User', // This could be dynamic based on user profile
-      message: newMessage.value.trim(),
-    })));
+    const currentUser = currentUserName.value;
 
+    // Create the message object
+    const messageData = {
+      name: currentUser,
+      message: newMessage.value.trim(),
+      timestamp: Date.now()
+    };
+
+    // Send message via WebSocket
+    websocketClient.send(JSON.stringify(messageData));
+
+    // Clear the input
     newMessage.value = '';
+
+    // Scroll to bottom after sending
+    nextTick(() => {
+      scrollToBottom();
+    });
   }
 };
 
@@ -86,7 +117,12 @@ const handleKeyPress = (event: KeyboardEvent) => {
   }
 };
 
+const statusInterval = ref<NodeJS.Timeout | null>(null);
+
 onMounted(async () => {
+  // Ensure auth store is initialized
+  authStore.initFromCookie();
+
   connectionStatus.value = 'connecting';
   try {
     await websocketClient.connect();
@@ -96,11 +132,13 @@ onMounted(async () => {
   }
 
   // Set up periodic status check
-  const statusInterval = setInterval(checkReconnectionStatus, 500);
+  statusInterval.value = setInterval(checkReconnectionStatus, 500);
+});
 
-  onUnmounted(() => {
-    clearInterval(statusInterval);
-  });
+onUnmounted(() => {
+  if (statusInterval.value) {
+    clearInterval(statusInterval.value);
+  }
 });
 
 const manualReconnect = async () => {
@@ -114,94 +152,209 @@ const manualReconnect = async () => {
     connectionStatus.value = 'error';
   }
 };
+
+const formatTime = (timestamp: number) => {
+  const date = new Date(timestamp);
+  const now = new Date();
+  const isToday = date.toDateString() === now.toDateString();
+
+  if (isToday) {
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  } else {
+    return date.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ' ' +
+      date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+};
+
+const isOwnMessage = (message: ChatMessage) => {
+  const currentUser = currentUserName.value;
+  const isOwn = message.name === currentUser;
+
+  return isOwn;
+};
 </script>
 
 <template>
-  <div class="p-10 h-full flex flex-col grow gap-4 overflow-scroll">
-    <!-- Connection Status Indicator -->
-    <div class="fixed top-4 right-4 z-50">
-      <div
-           :class="{
-            'bg-green-500': connectionStatus === 'connected',
-            'bg-yellow-500': connectionStatus === 'connecting',
-            'bg-red-500': connectionStatus === 'disconnected' || connectionStatus === 'error'
-          }"
-           class="px-3 py-1 rounded-full text-white text-sm font-medium shadow-lg">
-        {{ connectionStatus === 'connected' ? 'Connected' :
-          connectionStatus === 'connecting' ? 'Connecting...' :
-            connectionStatus === 'disconnected' ? 'Disconnected' : 'Error' }}
-        <span v-if="reconnectAttempts > 0" class="ml-2 text-xs">
-          ({{ reconnectAttempts }})
-        </span>
+  <div class="h-[calc(100dvh-96px)] flex flex-col bg-gradient-to-br from-slate-50 to-slate-100">
+    <!-- Header -->
+    <div class="flex-shrink-0 bg-white border-b border-slate-200 px-6 py-4 shadow-sm">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-xl font-semibold text-slate-800">Household Chat</h1>
+          <p class="text-sm text-slate-500">Stay connected with your household</p>
+        </div>
+
+        <!-- Connection Status -->
+        <div class="flex items-center gap-3">
+          <div class="flex items-center gap-2">
+            <div
+                 :class="{
+                  'bg-green-500': connectionStatus === 'connected',
+                  'bg-yellow-500': connectionStatus === 'connecting',
+                  'bg-red-500': connectionStatus === 'disconnected' || connectionStatus === 'error'
+                }"
+                 class="w-2 h-2 rounded-full animate-pulse"></div>
+            <span class="text-sm font-medium text-slate-600">
+              {{ connectionStatus === 'connected' ? 'Connected' :
+                connectionStatus === 'connecting' ? 'Connecting...' :
+                  connectionStatus === 'disconnected' ? 'Disconnected' : 'Error' }}
+            </span>
+          </div>
+
+          <button
+                  v-if="connectionStatus === 'disconnected' || connectionStatus === 'error'"
+                  @click="manualReconnect"
+                  class="flex items-center gap-1 px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-colors">
+            <IconRefresh class="w-4 h-4" />
+            Reconnect
+          </button>
+        </div>
       </div>
-      <!-- Manual Reconnect Button -->
-      <button
-              v-if="connectionStatus === 'disconnected' || connectionStatus === 'error'"
-              @click="manualReconnect"
-              class="mt-2 bg-blue-500 hover:bg-blue-600 px-3 py-1 rounded-full text-white text-sm font-medium shadow-lg">
-        Reconnect
-      </button>
     </div>
 
     <!-- Messages Container -->
-    <div v-if="messages.length === 0" class="flex-1 flex items-center justify-center text-neutral-500">
-      <p>No messages yet. Start a conversation!</p>
-    </div>
-
-    <!-- Dynamic Messages -->
     <div
-         v-for="(message, index) in messages"
-         :key="index"
-         :class="[
-          'w-3/4',
-          message.name === 'Fridge' ? '' : 'self-end'
-        ]">
-      <div :class="[
-        'flex gap-3',
-        message.name === 'Fridge' ? 'flex-row' : 'flex-row-reverse'
-      ]">
-        <div class="bg-neutral-300 rounded-full w-10 h-10 p-2 aspect-square">
-          <IconFridge v-if="message.name === 'Fridge'" class="w-full h-full text-neutral-600" />
-          <IconUser v-else class="w-full h-full text-neutral-600" />
+         ref="messagesContainer"
+         class="flex-1 overflow-y-auto px-6 py-4 space-y-4 min-h-0">
+      <!-- Empty State -->
+      <div v-if="messages.length === 0" class="flex items-center justify-center h-full">
+        <div class="text-center">
+          <div class="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center mx-auto mb-4">
+            <IconFridge class="w-8 h-8 text-slate-400" />
+          </div>
+          <h3 class="text-lg font-medium text-slate-700 mb-2">No messages yet</h3>
+          <p class="text-slate-500">Start a conversation with your household members!</p>
         </div>
-        <div :class="[
-          'p-4 pt-3 rounded-2xl',
-          message.name === 'Fridge'
-            ? 'text-neutral-700 bg-neutral-300'
-            : 'text-neutral-800 bg-red-200'
-        ]">
-          <span v-if="message.name !== 'Fridge'" class="block font-bold text-green-600">{{ message.name }}</span>
-          <span v-else class="block font-bold text-blue-500">{{ message.name }}</span>
-          <span>{{ message.message }}</span>
+      </div>
+
+      <!-- Messages -->
+      <div
+           v-for="(message, index) in messages"
+           :key="index"
+           :class="[
+            'flex mb-4',
+            isOwnMessage(message) ? 'justify-end' : 'justify-start'
+          ]">
+        <div
+             :class="[
+              'flex gap-3 max-w-[75%]',
+              isOwnMessage(message) ? 'flex-row-reverse' : 'flex-row'
+            ]">
+          <!-- Avatar -->
+          <div
+               :class="[
+                'flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center shadow-sm',
+                isOwnMessage(message)
+                  ? 'bg-gradient-to-br from-blue-500 to-blue-600'
+                  : 'bg-gradient-to-br from-slate-200 to-slate-300'
+              ]">
+            <IconFridge
+                        v-if="message.name === 'Fridge'"
+                        class="w-5 h-5 text-white" />
+            <IconUser
+                      v-else
+                      :class="isOwnMessage(message) ? 'text-white' : 'text-slate-600'"
+                      class="w-5 h-5" />
+          </div>
+
+          <!-- Message Bubble -->
+          <div class="flex flex-col min-w-0">
+            <!-- Name (only for received messages) -->
+            <div
+                 v-if="!isOwnMessage(message)"
+                 class="text-xs font-medium text-slate-600 mb-1 ml-1">
+              {{ message.name }}
+            </div>
+
+            <!-- Message Content -->
+            <div
+                 :class="[
+                  'px-4 py-3 rounded-2xl shadow-sm relative break-words',
+                  isOwnMessage(message)
+                    ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white'
+                    : 'bg-white text-slate-800 border border-slate-200'
+                ]">
+              <p class="text-sm leading-relaxed pr-0 pb-3 mb-0">{{ message.message }}</p>
+
+              <!-- Timestamp inside bubble -->
+              <div
+                   :class="[
+                    'text-xs absolute bottom-1 right-4',
+                    isOwnMessage(message) ? 'text-blue-100' : 'text-slate-400'
+                  ]">
+                {{ formatTime(message.timestamp) }}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-  <div class="rounded-tl-2xl rounded-tr-2xl bg-red-200 mx-4! px-5 py-4 drop-shadow-[0_-10px_40px_rgba(0,0,0,0.15)]">
-    <div class="w-full flex flex-row gap-5">
-      <input
-             v-model="newMessage"
-             @keypress="handleKeyPress"
-             type="text"
-             class="bg-white rounded-2xl grow px-4 outline-4 outline-transparent focus:outline-rose-600"
-             placeholder="Type a message..." />
-      <button
-              @click="sendMessage"
-              :disabled="!newMessage.trim() || connectionStatus !== 'connected'"
-              class="bg-rose-600 hover:bg-rose-700 disabled:bg-gray-400 disabled:cursor-not-allowed cursor-pointer rounded-3xl px-4 aspect-square text-white">
-        <IconSend />
-      </button>
+
+    <!-- Message Input -->
+    <div class="flex-shrink-0 bg-white border-t border-slate-200 px-6 py-4">
+      <div class="flex items-end gap-3">
+        <div class="flex-1 relative">
+          <input
+                 v-model="newMessage"
+                 @keypress="handleKeyPress"
+                 type="text"
+                 :disabled="connectionStatus !== 'connected'"
+                 class="w-full px-4 py-3 pr-12 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                 placeholder="Type your message..." />
+        </div>
+
+        <button
+                @click="sendMessage"
+                :disabled="!newMessage.trim() || connectionStatus !== 'connected'"
+                class="flex-shrink-0 w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 disabled:from-slate-300 disabled:to-slate-400 disabled:cursor-not-allowed text-white rounded-2xl flex items-center justify-center transition-all shadow-lg hover:shadow-xl">
+          <IconSend class="w-5 h-5" />
+        </button>
+      </div>
     </div>
   </div>
 </template>
 
-<style>
-#main-sec {
-  display: flex;
-  flex-direction: column;
+<style scoped>
+/* Custom scrollbar for messages container */
+.overflow-y-auto::-webkit-scrollbar {
+  width: 6px;
 }
 
-div#app {
-  max-height: 100vh;
+.overflow-y-auto::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.3);
+  border-radius: 3px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.5);
+}
+
+/* Smooth scrolling */
+.overflow-y-auto {
+  scroll-behavior: smooth;
+}
+
+/* Ensure full height */
+.h-full {
+  height: 100%;
+}
+
+/* Ensure flex container takes full height */
+.flex-1 {
+  flex: 1 1 0%;
+}
+
+/* Prevent flex items from shrinking */
+.flex-shrink-0 {
+  flex-shrink: 0;
+}
+
+/* Allow flex items to shrink to minimum content size */
+.min-h-0 {
+  min-height: 0;
 }
 </style>
