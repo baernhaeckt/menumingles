@@ -2,6 +2,8 @@ import { defineStore } from 'pinia'
 import { useCookies } from '@vueuse/integrations/useCookies'
 import dayjs from 'dayjs'
 import objectSupport from 'dayjs/plugin/objectSupport'
+import gravatarUrl from 'gravatar-url'
+
 dayjs.extend(objectSupport)
 
 type JwtPayload = {
@@ -52,6 +54,12 @@ export const useAuthStore = defineStore('auth', {
   getters: {
     isAuthenticated: (session) => !!session.token,
     username: (session) => session.user?.username,
+    email: (session) => session.user?.email,
+    getGravatarUrl: (session) => {
+      const email = session.user?.email?.trim().toLowerCase();
+      if (!email) return null;
+      return gravatarUrl(email, { size: 200 });
+    }
   },
   actions: {
     initFromCookie() {

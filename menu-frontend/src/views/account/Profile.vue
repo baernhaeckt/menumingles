@@ -28,14 +28,15 @@ useHead({
   ]
 });
 
-const { user } = useAuthStore();
+const { user, getGravatarUrl } = useAuthStore();
 </script>
 
 <template>
   <div class="block bg-white mt-10! p-5 mx-4 rounded-3xl">
     <div class="flex flex-row items-center gap-5 flex-nowrap mb-12">
       <img
-        src="@/assets/peter.jpg"
+        v-if="getGravatarUrl"
+        :src="getGravatarUrl"
         alt="profile picture"
         class="w-24 h-24 rounded-full border-2 border-neutral-700"
       />

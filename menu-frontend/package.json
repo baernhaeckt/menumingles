@@ -30,6 +30,7 @@
     "@vueuse/integrations": "^13.7.0",
     "axios": "^1.11.0",
     "dayjs": "^1.11.13",
+    "gravatar-url": "^4.0.1",
     "interactjs": "^1.10.27",
     "pinia": "^3.0.3",
     "qrcode.vue": "^3.6.0",
