@@ -113,7 +113,7 @@ interact('.item').draggable({
             </div>
 
             <div>
-              <h5 class="text-3xl font-poetsen-one text-center">Do you like this food?</h5>
+              <h5 class="text-3xl text-neutral-900 font-poetsen-one text-center">Do you like this food?</h5>
             </div>
           </div>
         </div>
