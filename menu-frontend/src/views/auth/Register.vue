@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useHead } from '@unhead/vue'
+import { z } from 'zod'
+import { httpClient } from '@/client/http-client.ts'
 
 const route = useRoute()
 const hasInvite = computed(() => !!route.query.householdInviteCode)
@@ -16,8 +18,92 @@ useHead({
         : 'Create a new account to start your own household',
     },
   ],
-  link: []
+  link: [],
 })
+
+const registerSchema = z
+  .object({
+    username: z.string().trim().min(1, 'Username is required'),
+    email: z.email().trim().min(1, 'Email is required'),
+    password: z
+      .string()
+      .min(8, 'Password must be at least 8 characters')
+      .regex(/[A-Z]/, 'Password must contain an uppercase letter')
+      .regex(/[a-z]/, 'Password must contain a lowercase letter')
+      .regex(/[0-9]/, 'Password must contain a number')
+      .regex(/[^A-Za-z0-9]/, 'Password must contain a symbol'),
+    confirmPassword: z.string(),
+    householdName: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Passwords must match',
+    path: ['confirmPassword'],
+  })
+  .refine((data) => data.householdName.length === 0 && hasInvite.value, {
+    message: 'Household name is required',
+    path: ['householdName'],
+  })
+
+type RegisterForm = z.infer<typeof registerSchema>
+
+const form = reactive<RegisterForm>({
+  username: '',
+  email: '',
+  password: '',
+  confirmPassword: '',
+  householdName: '',
+})
+
+const apiError = ref<string | null>(null)
+const apiMessage = ref<string | null>(null)
+
+const fieldErrors = ref<{
+  email?: string
+  password?: string
+  confirmPassword?: string
+  username?: string,
+  householdName?: string,
+}>({})
+const submitting = ref(false)
+
+function validate(): boolean {
+  const parsed = registerSchema.safeParse(form)
+  if (parsed.success) {
+    fieldErrors.value = {}
+    return true
+  }
+  // Map first error per field
+  const errs: typeof fieldErrors.value = {}
+  for (const issue of parsed.error.issues) {
+    const key = issue.path[0] as keyof RegisterForm | undefined
+    if (key && !errs[key]) {
+      errs[key] = issue.message
+    }
+  }
+  fieldErrors.value = errs
+  return false
+}
+
+async function onSubmit() {
+  if (!validate()) return
+  submitting.value = true
+  apiError.value = null
+  try {
+    const payload: Record<string, unknown> = {
+      email: form.email.trim(),
+      username: form.username.trim(),
+      password: form.password,
+    }
+    const invite = route.query.householdInviteCode
+    if (invite) payload.householdInviteCode = invite
+
+    await httpClient.post('/v1/auth/register', payload)
+  } catch (e: any) {
+    apiError.value = 'Unable to register. Please try again later.'
+  } finally {
+    submitting.value = false
+  }
+}
 
 const particleConfig = {
   fullScreen: {
@@ -35,7 +121,7 @@ const particleConfig = {
       },
       life: {
         count: 1,
-        duration: 1.5
+        duration: 1.5,
       },
       particles: {
         move: {
@@ -59,7 +145,7 @@ const particleConfig = {
       },
       life: {
         count: 1,
-        duration: 1.5
+        duration: 1.5,
       },
       particles: {
         move: {
@@ -171,68 +257,134 @@ const particleConfig = {
       class="h-36 w-auto mx-auto mb-16"
     />
     <img
-        v-else
-        src="@/assets/illustrations/undraw_enter_nwx3.svg"
-        alt="illustration"
-        class="h-36 w-auto mx-auto mb-16"
+      v-else
+      src="@/assets/illustrations/undraw_enter_nwx3.svg"
+      alt="illustration"
+      class="h-36 w-auto mx-auto mb-16"
     />
 
     <div v-if="hasInvite">
       <h1 class="text-center text-red-600 font-poetsen-one text-3xl md:text-5xl mb-2">"WG Bern"</h1>
-      <h2 class="mb-12! text-center text-lg md:text-2xl text-neutral-500">
+      <h2 class="mb-12! text-center text-lg md:text-2xl text-gray-700">
         You have been invited to this household.<br />Register an account to accept the invitation.
       </h2>
     </div>
     <div v-else>
       <h1 class="text-center text-red-600 font-poetsen-one text-3xl md:text-5xl mb-2">Register</h1>
-      <h2 class="mb-12! text-center text-lg md:text-2xl text-neutral-500">
+      <h2 class="mb-12! text-center text-lg md:text-2xl text-gray-700">
         You are creating a new household.<br />Register an account to start.
       </h2>
     </div>
 
-    <div class="md:w-1/2! mx-auto mb-5">
-      <label class="text-neutral-600" for="account-email"
-        >Email <span class="text-orange-500">*</span></label
-      >
-      <input
-        id="account-email"
-        type="email"
-        placeholder="dan@mingle.xyz"
-        class="w-full bg-neutral-100 p-2 rounded-2xl outline-4 outline-transparent focus:outline-rose-600"
-      />
-    </div>
+    <form @submit.prevent="onSubmit" novalidate>
+      <div class="md:w-1/2! mx-auto mb-5">
+        <label class="text-neutral-600" for="account-username"
+          >Username <span class="text-orange-500">*</span></label
+        >
+        <input
+          id="account-username"
+          type="email"
+          placeholder="Dan"
+          v-model="form.username"
+          autocomplete="name"
+          class="w-full bg-neutral-100 p-2 rounded-2xl outline-4 outline-transparent focus:outline-rose-600"
+        />
 
-    <div class="md:w-1/2! mx-auto mb-5">
-      <label class="text-neutral-600" for="account-password"
-        >Password <span class="text-orange-500">*</span></label
-      >
-      <input
-        id="account-password"
-        type="password"
-        placeholder="●●●●●●●●●●●●"
-        class="w-full bg-neutral-100 p-2 rounded-2xl outline-4 outline-transparent focus:outline-rose-600"
-      />
-    </div>
+        <p v-if="fieldErrors.username" class="text-sm text-red-600 mt-1">
+          <i class="ti ti-exclamation-circle-filled"></i>
+          {{ fieldErrors.username }}
+        </p>
+      </div>
 
-    <div class="md:w-1/2! mx-auto mb-10">
-      <label class="text-neutral-600" for="confirm-account-password"
-        >Confirm password <span class="text-orange-500">*</span></label
-      >
-      <input
-        id="confirm-account-password"
-        type="password"
-        placeholder="●●●●●●●●●●●●"
-        class="w-full bg-neutral-100 p-2 rounded-2xl outline-4 outline-transparent focus:outline-rose-600"
-      />
-    </div>
+      <div class="md:w-1/2! mx-auto mb-5">
+        <label class="text-neutral-600" for="account-email"
+          >E-Mail <span class="text-orange-500">*</span></label
+        >
+        <input
+          id="account-email"
+          type="email"
+          v-model="form.email"
+          autocomplete="email"
+          placeholder="dan@mingle.xyz"
+          class="w-full bg-neutral-100 p-2 rounded-2xl outline-4 outline-transparent focus:outline-rose-600"
+        />
+        <p v-if="fieldErrors.email" class="text-sm text-red-600 mt-1">
+          <i class="ti ti-exclamation-circle-filled"></i>
+          {{ fieldErrors.email }}
+        </p>
+      </div>
 
-    <div class="md:w-1/2! mx-auto">
-      <button
-        class="rounded-2xl bg-red-600 hover:bg-red-700 px-6 py-2 text-white font-bold cursor-pointer w-full flex flex-row justify-center items-center gap-2 outline-4 outline-transparent outline-solid outline-offset-2 focus-visible:outline-red-200"
-      >
-        Register
-      </button>
-    </div>
+      <div class="md:w-1/2! mx-auto mb-5">
+        <label class="text-neutral-600" for="account-password"
+          >Password <span class="text-orange-500">*</span></label
+        >
+        <input
+          id="account-password"
+          type="password"
+          v-model="form.password"
+          autocomplete="password"
+          placeholder="●●●●●●●●●●●●"
+          class="w-full bg-neutral-100 p-2 rounded-2xl outline-4 outline-transparent focus:outline-rose-600"
+        />
+
+        <p v-if="fieldErrors.password" class="text-sm text-red-600 mt-1">
+          <i class="ti ti-exclamation-circle-filled"></i>
+          {{ fieldErrors.password }}
+        </p>
+      </div>
+
+      <div class="md:w-1/2! mx-auto mb-5">
+        <label class="text-neutral-600" for="confirm-account-password"
+          >Confirm password <span class="text-orange-500">*</span></label
+        >
+        <input
+          id="confirm-account-password"
+          type="password"
+          v-model="form.confirmPassword"
+          autocomplete="password"
+          placeholder="●●●●●●●●●●●●"
+          class="w-full bg-neutral-100 p-2 rounded-2xl outline-4 outline-transparent focus:outline-rose-600"
+        />
+        <p v-if="fieldErrors.confirmPassword" class="text-sm text-red-600 mt-1">
+          <i class="ti ti-exclamation-circle-filled"></i>
+          {{ fieldErrors.confirmPassword }}
+        </p>
+      </div>
+
+      <div v-if="!hasInvite" class="md:w-1/2! mx-auto mb-5">
+        <label class="text-neutral-600" for="household-name"
+          >Username <span class="text-orange-500">*</span></label
+        >
+        <input
+          id="household-name"
+          type="text"
+          placeholder="WG Bern"
+          v-model="form.householdName"
+          autocomplete="name"
+          class="w-full bg-neutral-100 p-2 rounded-2xl outline-4 outline-transparent focus:outline-rose-600"
+        />
+
+        <p v-if="fieldErrors.householdName" class="text-sm text-red-600 mt-1">
+          <i class="ti ti-exclamation-circle-filled"></i>
+          {{ fieldErrors.householdName }}
+        </p>
+      </div>
+
+      <div v-if="apiError" class="bg-red-300 rounded-3xl p-5 text-red-800 mb-8 md:w-1/2! mx-auto">
+        <i class="ti ti-exclamation-circle-filled"></i>
+        {{ apiError }}
+      </div>
+
+      <div class="md:w-1/2! mx-auto">
+        <button
+          type="submit"
+          :disabled="submitting"
+          class="rounded-2xl bg-red-600 hover:bg-red-700 px-6 py-2 text-white font-bold cursor-pointer w-full flex flex-row justify-center items-center gap-2 outline-4 outline-transparent outline-solid outline-offset-2 focus-visible:outline-red-200"
+        >
+          Register
+        </button>
+      </div>
+    </form>
   </div>
 
   <vue-particles v-if="hasInvite" id="tsparticles" :options="particleConfig" />
