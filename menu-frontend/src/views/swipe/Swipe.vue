@@ -12,16 +12,32 @@ import { httpClient } from '@/client/http-client.ts'
 import { z } from 'zod'
 import { useAuthStore } from '@/stores/auth.ts'
 import { API_IMAGE_GEN_URL } from '@/constants.ts'
+import { useToast } from 'vue-toast-notification'
 
 function onSwipeLeft() {
-  console.log('Swiped left')
+  const currentCard = getCurrentCard()
+  menuDecisions.value.push({
+    id: currentCard.id,
+    name: currentCard.names,
+    like: false,
+  })
 }
 
 function onSwipeRight() {
-  console.log('Swiped right')
+  const currentCard = getCurrentCard()
+  menuDecisions.value.push({
+    id: currentCard.id,
+    name: currentCard.names,
+    like: true,
+  })
 }
 
-const auth = useAuthStore()
+function getCurrentCard() {
+  return cards.value[cards.value.length - 1]
+}
+
+const auth = useAuthStore();
+const toast = useToast();
 
 /**
  * Starts the planning process for the week.
@@ -51,7 +67,7 @@ async function continuePlanningAsync() {
  * from the swiping.
  * @see continuePlanning must be called first to retrieve the sessionKey and the menu selection.
  */
-async function selectMenuItemsAsync(request: { sessionKey: string; menuSelection: any }) {
+async function selectMenuItemsAsync(request: { sessionKey: string; menuSelection: string[] }) {
   const response = await httpClient.post('v1/planning/continue', request, {
     headers: {
       Authorization: `Bearer ${auth.token}`,
@@ -62,6 +78,18 @@ async function selectMenuItemsAsync(request: { sessionKey: string; menuSelection
   }
 
   throw new Error('Failed to continue planning')
+}
+
+async function finishSwipingAsync() {
+  await selectMenuItemsAsync({
+    sessionKey: sessionKey.value!,
+    menuSelection: menuDecisions.value
+      .filter((decision) => decision.like)
+      .map((selection) => selection.name)
+      .flatMap((name) => name),
+  });
+
+  toast.success('<i class="ti ti-circle-check-filled"></i> Thank you for swiping');
 }
 
 const sessionKey = ref<string | null>(null)
@@ -76,17 +104,21 @@ onMounted(async () => {
     )
   }
 
-  let count = 0;
+  let count = 0
   for (let i = 0; i < result.menuSelection.length; i += 3) {
     cards.value.push({
       id: count,
       names: result.menuSelection.slice(i, i + 3).map((selection) => selection.name),
-      ingredients: result.menuSelection.slice(i, i + 3).map((selection) => selection.ingredients).flatMap(ingredient => ingredient),
+      ingredients: result.menuSelection
+        .slice(i, i + 3)
+        .map((selection) => selection.ingredients)
+        .flatMap((ingredient) => ingredient),
     })
   }
-});
+})
 
 const cards = ref<{ id: number; names: string[]; ingredients: string[] }[]>([])
+const menuDecisions = ref<{ id: number; name: string[]; like: boolean }[]>([])
 
 const topIndex = computed(() => cards.value.length - 1)
 
@@ -114,12 +146,16 @@ function swipeByButton(direction: 'left' | 'right') {
   el.style.transition = `transform ${duration}ms cubic-bezier(.22,.61,.36,1)`
   setTransform(el, offscreenX)
 
-  const onEnd = () => {
+  const onEnd = async () => {
     el.removeEventListener('transitionend', onEnd)
     if (dir > 0) onSwipeRight()
     else onSwipeLeft()
     // Remove the top card after the animation completes
     cards.value.pop()
+
+    if (cards.value.length === 0) {
+      await finishSwipingAsync()
+    }
   }
   el.addEventListener('transitionend', onEnd, { once: true })
 }
@@ -196,10 +232,10 @@ interact('.item').draggable({
   },
 })
 
-function getImage (name: string) {
-  const url = new URL(API_IMAGE_GEN_URL);
-  url.searchParams.append('name', name);
-  return url.toString();
+function getImage(name: string) {
+  const url = new URL(API_IMAGE_GEN_URL)
+  url.searchParams.append('name', name)
+  return url.toString()
 }
 </script>
 
