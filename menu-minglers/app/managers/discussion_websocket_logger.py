@@ -134,8 +134,11 @@ class DiscussionWebsocketLogger:
                         message_text = self._parse_message(message).strip()
                         sender_name = self._parse_sender_name(message).strip()
 
-                        payload = {"name": sender_name,
-                                   "message": message_text}
+                        payload = {
+                            "type": "chat",
+                            "name": sender_name,
+                            "message": message_text
+                        }
                         await self.websocket_service.broadcast_message(json.dumps(payload))
 
                     # cooperative pause (don’t block the loop)

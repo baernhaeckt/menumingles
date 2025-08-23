@@ -1,5 +1,10 @@
 
 import asyncio
+import threading
+import uuid
+from datetime import datetime, timezone
+from enum import Enum
+from typing import Dict, Optional
 
 import tinytroupe
 from tinytroupe.agent import TinyPerson
@@ -10,6 +15,135 @@ from tinytroupe.factory import TinyPersonFactory
 from app.core.logging import logger
 from app.managers.discussion_websocket_logger import DiscussionWebsocketLogger
 from app.services.websocket_service import WebSocketService
+
+
+class DiscussionStatus(Enum):
+    """Status of a discussion task."""
+    PENDING = "pending"
+    RUNNING = "running"
+    COMPLETED = "completed"
+    FAILED = "failed"
+
+
+class DiscussionTask:
+    """Represents a discussion task with its state."""
+
+    def __init__(self, task_id: str, request_data: dict):
+        self.task_id = task_id
+        self.request_data = request_data
+        self.status = DiscussionStatus.PENDING
+        self.result: Optional[dict] = None
+        self.error: Optional[str] = None
+        self.created_at = datetime.now(timezone.utc)
+        self.started_at: Optional[datetime] = None
+        self.completed_at: Optional[datetime] = None
+
+
+class BackgroundDiscussionManager:
+    """Manages background discussion tasks with singleton pattern."""
+
+    _instance: Optional['BackgroundDiscussionManager'] = None
+    _lock = threading.Lock()
+
+    def __new__(cls):
+        if cls._instance is None:
+            with cls._lock:
+                if cls._instance is None:
+                    cls._instance = super().__new__(cls)
+        return cls._instance
+
+    def __init__(self):
+        if not hasattr(self, '_initialized'):
+            self._tasks: Dict[str, DiscussionTask] = {}
+            self._current_task_id: Optional[str] = None
+            self._task_lock = threading.Lock()
+            self._initialized = True
+
+    def start_discussion(self, request_data: dict) -> str:
+        """
+        Start a new discussion task.
+
+        Args:
+            request_data: The discussion request data
+
+        Returns:
+            str: The task ID
+
+        Raises:
+            RuntimeError: If another discussion is already running
+        """
+        with self._task_lock:
+            if self._current_task_id is not None:
+                current_task = self._tasks.get(self._current_task_id)
+                if current_task and current_task.status in [DiscussionStatus.PENDING, DiscussionStatus.RUNNING]:
+                    raise RuntimeError("Another discussion is already running")
+
+            # Create new task
+            task_id = str(uuid.uuid4())
+            task = DiscussionTask(task_id, request_data)
+            self._tasks[task_id] = task
+            self._current_task_id = task_id
+
+            # Start background thread
+            thread = threading.Thread(
+                target=self._run_discussion_task,
+                args=(task_id,),
+                daemon=True
+            )
+            thread.start()
+
+            return task_id
+
+    def get_task_status(self, task_id: str) -> Optional[DiscussionTask]:
+        """Get the status of a discussion task."""
+        return self._tasks.get(task_id)
+
+    def _run_discussion_task(self, task_id: str):
+        """Run the discussion task in a background thread."""
+        task = self._tasks.get(task_id)
+        if not task:
+            return
+
+        try:
+            # Update status to running
+            task.status = DiscussionStatus.RUNNING
+            task.started_at = datetime.now(timezone.utc)
+
+            # Create discussion manager and run discussion
+            discussion_manager = DiscussionManager()
+            result = discussion_manager.discuss_menus(
+                people=task.request_data["people"],
+                chef=task.request_data["chef"],
+                consultants=task.request_data["consultants"],
+                menu=task.request_data["menu"]
+            )
+
+            # Update task with result
+            task.result = result
+            task.status = DiscussionStatus.COMPLETED
+            task.completed_at = datetime.now(timezone.utc)
+
+            logger.log_info("Background discussion completed successfully", additional_context={
+                "task_id": task_id,
+                "duration_seconds": (task.completed_at - task.started_at).total_seconds()
+            })
+
+        except Exception as e:
+            # Update task with error
+            task.error = str(e)
+            task.status = DiscussionStatus.FAILED
+            task.completed_at = datetime.now(timezone.utc)
+
+            logger.log_error(e, additional_context={
+                "task_id": task_id,
+                "method": "_run_discussion_task"
+            })
+
+        finally:
+            # Clear current task if this was the active one
+            with self._task_lock:
+                if self._current_task_id == task_id:
+                    self._current_task_id = None
 
 
 class DiscussionManager:
