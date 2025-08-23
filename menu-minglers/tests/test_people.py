@@ -1,106 +1,116 @@
 """Tests for people endpoints."""
 
-from unittest.mock import Mock, patch
-
 import pytest
-from fastapi.testclient import TestClient
+from pydantic import ValidationError
 
-from app.main import app
+from app.models.people import (
+    AgentPersonGenerationRequest,
+    AgentPersonResponse,
+    Persona,
+    PersonGenerationRequest,
+    PersonResponse,
+)
 
-client = TestClient(app)
 
+class TestPersonModels:
+    """Test cases for person models."""
 
-class TestFamilyMembersEndpoint:
-    """Test cases for the family members endpoint."""
+    def test_person_generation_request_valid(self):
+        """Test valid person generation request."""
+        request_data = {
+            "gender": "female",
+            "name": "Sarah Johnson",
+            "preferences": ["organic food", "quick meals"],
+            "intolerances": ["lactose"],
+            "short_term_goals": ["lose weight"],
+            "long_term_goals": ["maintain healthy lifestyle"]
+        }
 
-    def test_generate_family_members_default_count(self):
-        """Test generating family members with default count."""
-        with patch('app.api.v1.endpoints.people.PeopleManager') as mock_manager:
-            # Mock the TinyPerson objects with _persona attribute
-            mock_person = Mock()
-            mock_person._persona = {
-                "name": "Sarah Johnson",
-                "role": "A mother who cares deeply about healthy, balanced meals.",
-                "personality": "Sarah is nurturing and organized.",
-                "preferences": "Prefers organic ingredients."
-            }
+        request = PersonGenerationRequest(**request_data)
+        assert request.gender == "female"
+        assert request.name == "Sarah Johnson"
+        assert request.preferences == ["organic food", "quick meals"]
+        assert request.intolerances == ["lactose"]
+        assert request.short_term_goals == ["lose weight"]
+        assert request.long_term_goals == ["maintain healthy lifestyle"]
 
-            mock_manager_instance = Mock()
-            mock_manager_instance.get_family_members.return_value = [
-                mock_person]
-            mock_manager_instance.family_context = "HomeBite is a close-knit family kitchen collective..."
-            mock_manager.return_value = mock_manager_instance
+    def test_person_generation_request_missing_fields(self):
+        """Test person generation request with missing fields."""
+        request_data = {
+            "gender": "female",
+            "name": "Sarah Johnson"
+            # Missing required fields
+        }
 
-            response = client.get("/api/v1/family-members")
+        with pytest.raises(ValidationError):
+            PersonGenerationRequest(**request_data)
 
-            assert response.status_code == 200
-            data = response.json()
-            assert data["count"] == 5  # Default count
-            assert len(data["family_members"]) == 1
-            assert data["family_members"][0]["persona"]["name"] == "Sarah Johnson"
-            assert "context" in data
+    def test_agent_person_generation_request_valid(self):
+        """Test valid agent person generation request."""
+        request_data = {
+            "gender": "female",
+            "name": "Dr. Maria Schmidt",
+            "expertise": "nutrition science"
+        }
 
-    def test_generate_family_members_custom_count(self):
-        """Test generating family members with custom count."""
-        with patch('app.api.v1.endpoints.people.PeopleManager') as mock_manager:
-            # Mock the TinyPerson objects with _persona attribute
-            mock_person1 = Mock()
-            mock_person1._persona = {
-                "name": "John Smith",
-                "role": "A father who loves grilling.",
-                "personality": "John is adventurous and loves cooking outdoors.",
-                "preferences": "Prefers grilled meats and hearty dishes."
-            }
+        request = AgentPersonGenerationRequest(**request_data)
+        assert request.gender == "female"
+        assert request.name == "Dr. Maria Schmidt"
+        assert request.expertise == "nutrition science"
 
-            mock_person2 = Mock()
-            mock_person2._persona = {
-                "name": "Emma Smith",
-                "role": "A teenage daughter who is vegetarian.",
-                "personality": "Emma is creative and health-conscious.",
-                "preferences": "Prefers plant-based meals and experiments with new recipes."
-            }
+    def test_agent_person_generation_request_missing_fields(self):
+        """Test agent person generation request with missing fields."""
+        request_data = {
+            "gender": "female"
+            # Missing required fields
+        }
 
-            mock_manager_instance = Mock()
-            mock_manager_instance.get_family_members.return_value = [
-                mock_person1, mock_person2]
-            mock_manager_instance.family_context = "HomeBite is a close-knit family kitchen collective..."
-            mock_manager.return_value = mock_manager_instance
+        with pytest.raises(ValidationError):
+            AgentPersonGenerationRequest(**request_data)
 
-            response = client.get("/api/v1/family-members?count=2")
+    def test_person_response_valid(self):
+        """Test valid person response."""
+        persona_data = {
+            "name": "Sarah Johnson",
+            "role": "A female person named Sarah Johnson who likes ['organic food', 'quick meals'].",
+            "personality": "Sarah is nurturing and organized."
+        }
 
-            assert response.status_code == 200
-            data = response.json()
-            assert data["count"] == 2
-            assert len(data["family_members"]) == 2
-            assert data["family_members"][0]["persona"]["name"] == "John Smith"
-            assert data["family_members"][1]["persona"]["name"] == "Emma Smith"
+        response_data = {
+            "person": {"persona": persona_data},
+            "context": "HomeBite is a typical Swiss family household..."
+        }
 
-    def test_generate_family_members_invalid_count_too_low(self):
-        """Test generating family members with count too low."""
-        response = client.get("/api/v1/family-members?count=0")
+        response = PersonResponse(**response_data)
+        assert response.person.persona["name"] == "Sarah Johnson"
+        assert "HomeBite is a typical Swiss family household" in response.context
 
-        assert response.status_code == 422  # FastAPI validation error
-        assert "Input should be greater than or equal to 1" in response.json()[
-            "detail"][0]["msg"]
+    def test_agent_person_response_valid(self):
+        """Test valid agent person response."""
+        persona_data = {
+            "name": "Dr. Maria Schmidt",
+            "role": "A female person named Dr. Maria Schmidt that is an absolute expert in nutrition science.",
+            "personality": "Dr. Schmidt is passionate about nutrition science."
+        }
 
-    def test_generate_family_members_invalid_count_too_high(self):
-        """Test generating family members with count too high."""
-        response = client.get("/api/v1/family-members?count=21")
+        response_data = {
+            "agent": {"persona": persona_data},
+            "context": "HomeBite Experts are a diverse circle of specialists..."
+        }
 
-        assert response.status_code == 422  # FastAPI validation error
-        assert "Input should be less than or equal to 20" in response.json()[
-            "detail"][0]["msg"]
+        response = AgentPersonResponse(**response_data)
+        assert response.agent.persona["name"] == "Dr. Maria Schmidt"
+        assert "HomeBite Experts are a diverse circle of specialists" in response.context
 
-    def test_generate_family_members_manager_exception(self):
-        """Test handling of manager exceptions."""
-        with patch('app.api.v1.endpoints.people.PeopleManager') as mock_manager:
-            mock_manager_instance = Mock()
-            mock_manager_instance.get_family_members.side_effect = Exception(
-                "Test error")
-            mock_manager.return_value = mock_manager_instance
+    def test_persona_model_valid(self):
+        """Test valid persona model."""
+        persona_data = {
+            "name": "Test Person",
+            "role": "Test role",
+            "personality": "Test personality"
+        }
 
-            response = client.get("/api/v1/family-members")
-
-            assert response.status_code == 500
-            assert "Failed to generate family members" in response.json()[
-                "detail"]
+        persona = Persona(persona=persona_data)
+        assert persona.persona["name"] == "Test Person"
+        assert persona.persona["role"] == "Test role"
+        assert persona.persona["personality"] == "Test personality"

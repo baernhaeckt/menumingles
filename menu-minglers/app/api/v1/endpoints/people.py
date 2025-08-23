@@ -2,97 +2,170 @@
 
 from typing import List
 
-from fastapi import APIRouter, HTTPException, Query, status
+from fastapi import APIRouter, HTTPException, status
 
 from app.managers.people_manager import PeopleManager
-from app.models.people import FamilyMember, FamilyMembersResponse
+from app.models.people import (
+    AgentPersonGenerationRequest,
+    AgentPersonResponse,
+    Persona,
+    PersonGenerationRequest,
+    PersonResponse,
+)
 
 router = APIRouter()
 
 
-@router.get(
-    "/family-members",
-    response_model=FamilyMembersResponse,
-    summary="Generate Family Members",
-    description="Generate a specified number of family members with unique personalities and preferences",
+@router.post(
+    "/generate-person",
+    response_model=PersonResponse,
+    summary="Generate a Person",
+    description="Generate a person with specific attributes including preferences, intolerances, and goals",
     responses={
         200: {
-            "description": "Family members generated successfully",
+            "description": "Person generated successfully",
             "content": {
                 "application/json": {
                     "example": {
-                        "family_members": [
-                            {
-                                "persona": {
-                                    "name": "Sarah Johnson",
-                                    "role": "A mother who cares deeply about healthy, balanced meals.",
-                                    "personality": "Sarah is nurturing and organized, always thinking about nutrition and family well-being.",
-                                    "preferences": "Prefers organic ingredients, balanced macronutrients, and meals that can be prepared ahead of time.",
-                                    "additional_attributes": "Various other persona attributes from TinyTroupe"
-                                }
+                        "person": {
+                            "persona": {
+                                "name": "Sarah Johnson",
+                                "role": "A female person named Sarah Johnson who likes ['organic food', 'quick meals'].",
+                                "personality": "Sarah is nurturing and organized, always thinking about nutrition and family well-being.",
+                                "preferences": "Prefers organic ingredients, balanced macronutrients, and meals that can be prepared ahead of time.",
+                                "additional_attributes": "Various other persona attributes from TinyTroupe"
                             }
-                        ],
-                        "count": 1,
-                        "context": "HomeBite is a close-knit family kitchen collective..."
+                        },
+                        "context": "HomeBite is a typical Swiss family household..."
                     }
                 }
             }
         },
         400: {
-            "description": "Invalid number of family members requested",
+            "description": "Invalid request parameters",
             "content": {
                 "application/json": {
                     "example": {
-                        "detail": "Number of family members must be between 1 and 20"
+                        "detail": "Invalid parameters provided"
                     }
                 }
             }
         }
     }
 )
-async def generate_family_members(
-    count: int = Query(
-        default=5,
-        ge=1,
-        le=20,
-        description="Number of family members to generate (1-20)"
-    )
-) -> FamilyMembersResponse:
+async def generate_person(request: PersonGenerationRequest) -> PersonResponse:
     """
-    Generate a specified number of family members with unique personalities and preferences.
+    Generate a person with specific attributes.
 
     Args:
-        count: Number of family members to generate (1-20)
+        request: PersonGenerationRequest containing all required attributes
 
     Returns:
-        FamilyMembersResponse: The generated family members
+        PersonResponse: The generated person with persona data
 
     Raises:
-        HTTPException: If the count is invalid
+        HTTPException: If generation fails
     """
-
     people_manager = PeopleManager()
 
     try:
-        # Generate family members using the manager
-        tiny_persons = people_manager.get_family_members(count)
+        # Generate person using the manager
+        tiny_person = people_manager.generate_person(
+            gender=request.gender,
+            name=request.name,
+            preferences=request.preferences,
+            intolerances=request.intolerances,
+            short_term_goals=request.short_term_goals,
+            long_term_goals=request.long_term_goals
+        )
 
-        # Convert TinyPerson objects to our FamilyMember model using _persona attribute
-        family_members = []
-        for person in tiny_persons:
-            # Access the _persona attribute which contains the JSON/object data
-            persona_data = getattr(person, '_persona', {})
-            family_member = FamilyMember(persona=persona_data)
-            family_members.append(family_member)
+        # Convert TinyPerson object to our Persona model
+        persona_data = getattr(tiny_person, '_persona', {})
+        person = Persona(persona=persona_data)
 
-        return FamilyMembersResponse(
-            family_members=family_members,
-            count=count,
+        return PersonResponse(
+            person=person,
             context=people_manager.family_context.strip()
         )
 
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to generate family members: {str(e)}"
+            detail=f"Failed to generate person: {str(e)}"
+        )
+
+
+@router.post(
+    "/generate-agent-person",
+    response_model=AgentPersonResponse,
+    summary="Generate an Agent Person",
+    description="Generate an agent person with specific expertise",
+    responses={
+        200: {
+            "description": "Agent person generated successfully",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "agent": {
+                            "persona": {
+                                "name": "Dr. Maria Schmidt",
+                                "role": "A female person named Dr. Maria Schmidt that is an absolute expert in nutrition science.",
+                                "personality": "Dr. Schmidt is passionate about nutrition science and sees herself as a guardian of quality and accuracy.",
+                                "expertise": "Deep knowledge in nutrition science with a focus on evidence-based recommendations.",
+                                "additional_attributes": "Various other persona attributes from TinyTroupe"
+                            }
+                        },
+                        "context": "HomeBite Experts are a diverse circle of specialists..."
+                    }
+                }
+            }
+        },
+        400: {
+            "description": "Invalid request parameters",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "detail": "Invalid parameters provided"
+                    }
+                }
+            }
+        }
+    }
+)
+async def generate_agent_person(request: AgentPersonGenerationRequest) -> AgentPersonResponse:
+    """
+    Generate an agent person with specific expertise.
+
+    Args:
+        request: AgentPersonGenerationRequest containing gender, name, and expertise
+
+    Returns:
+        AgentPersonResponse: The generated agent person with persona data
+
+    Raises:
+        HTTPException: If generation fails
+    """
+    people_manager = PeopleManager()
+
+    try:
+        # Generate agent person using the manager
+        tiny_person = people_manager.generate_agent_person(
+            gender=request.gender,
+            name=request.name,
+            expertise=request.expertise
+        )
+
+        # Convert TinyPerson object to our Persona model
+        persona_data = getattr(tiny_person, '_persona', {})
+        agent = Persona(persona=persona_data)
+
+        return AgentPersonResponse(
+            agent=agent,
+            context=people_manager.agent_context.strip()
+        )
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to generate agent person: {str(e)}"
         )
