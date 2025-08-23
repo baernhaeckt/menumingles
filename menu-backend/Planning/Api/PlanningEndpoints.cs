@@ -19,6 +19,7 @@ public static class PlanningEndpoints
             [FromBody] PlanningStartRequest request,
             IPlanSessionStore planSessionStore,
             RecommenderClient recommenderClient,
+            MenuMinglersClient menuMinglersClient,
             ClaimsPrincipal user) =>
         {
             // We get from the ingredients we have from the fridge a recommendation for starting menus
@@ -39,7 +40,7 @@ public static class PlanningEndpoints
             string sessionKey = await planSessionStore.StartSessionAsync(user.GetHouseholdKey(), request.Ingredients, json);
 
             // We notify the users that the planning session has started (i.e., the fridge send a msg)
-            // TODO: REST API to send notification into the chat (other system has websocket)
+            await menuMinglersClient.BroadcastMessageAsync(new BroadcastRequest("Fridge", "I'm running empty. Planning time!"));
 
             return Results.Ok(sessionKey);
         })

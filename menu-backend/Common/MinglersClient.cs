@@ -25,6 +25,13 @@ public class MenuMinglersClient
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<DiscussionResponse>(cancellationToken: ct);
     }
+
+    /// <summary>POST /api/v1/discuss</summary>
+    public async Task BroadcastMessageAsync(BroadcastRequest request, CancellationToken ct = default)
+    {
+        var response = await _http.PostAsJsonAsync("/api/v1/ws/broadcast", request, ct);
+        response.EnsureSuccessStatusCode();
+    }
 }
 
 /// <summary>
@@ -39,4 +46,13 @@ public sealed record DiscussionRequest(
 
 public sealed record DiscussionResponse(
     JsonElement[] Results // schema not fixed. Contains weekdays
+);
+
+
+/// <summary>
+/// Root request for /api/v1/ws/broadcast
+/// </summary>
+public sealed record BroadcastRequest(
+    string Name,
+    string Message
 );
