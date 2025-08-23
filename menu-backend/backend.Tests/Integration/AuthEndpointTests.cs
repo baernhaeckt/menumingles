@@ -19,7 +19,26 @@ public class AuthEndpointTests
     public void Cleanup() => _factory?.Dispose();
 
     [TestMethod]
-    public async Task AuthRegisterEndpoint_ShouldReturn200Ok()
+    public async Task AuthRegisterEndpoint_ShouldReturn200Ok_WhenFreshHousehold()
+    {
+        // Arrange
+        var client = _factory.CreateClient();
+
+        // Act
+        HttpResponseMessage response = await client.PostAsJsonAsync("/api/v1/auth/register", new RegisterRequest()
+        {
+            Username = "testuser",
+            Email = "tester@test.ch",
+            Password = "Test123",
+            Household = "testhousehold"
+        });
+
+        // Assert
+        Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [TestMethod]
+    public async Task AuthRegisterEndpoint_ShouldReturn200Ok_WhenExistingHousehold()
     {
         // Arrange
         var client = _factory.CreateClient();
@@ -29,7 +48,9 @@ public class AuthEndpointTests
         {
             Username = "testuser",
             Email = "tester@test.ch",
-            Password = "Test123"
+            Password = "Test123",
+            Household = "testhousehold",
+            HouseholdKey = "1234"
         });
 
         // Assert
@@ -45,7 +66,8 @@ public class AuthEndpointTests
         {
             Username = "testuser",
             Email = "tester@test.ch",
-            Password = "Test123"
+            Password = "Test123",
+            Household = "testhousehold"
         });
         response1.EnsureSuccessStatusCode();
 
@@ -71,7 +93,8 @@ public class AuthEndpointTests
         {
             Username = "testuser",
             Email = "tester@test.ch",
-            Password = "Test123"
+            Password = "Test123",
+            Household = "testhousehold"
         });
 
         // Act
@@ -88,6 +111,7 @@ public class AuthEndpointTests
 
         // Assert
         Assert.AreEqual(HttpStatusCode.OK, meResponse.StatusCode);
-        string meContent = await meResponse.Content.ReadAsStringAsync();
+        ProfileResponse? responseContent = await meResponse.Content.ReadFromJsonAsync<ProfileResponse>();
+        Assert.IsNotNull(responseContent?.HouseholdKey);
     }
 }

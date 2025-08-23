@@ -61,7 +61,8 @@ public static class AuthEndpoints
                 return Results.BadRequest(new { message = "Username or email already exists" });
             }
 
-            await userStore.SaveAsync(new User(request.Username, request.Email), request.Password);
+            string householdKey = request.HouseholdKey ?? Guid.NewGuid().ToString();
+            await userStore.SaveAsync(new User(request.Username, request.Email, request.Household, householdKey), request.Password);
 
             return Results.Ok(new { message = "User registered successfully" });
         })
@@ -86,10 +87,12 @@ public static class AuthEndpoints
                 return Results.NotFound();
             }
 
-            return Results.Ok(new
+            return Results.Ok(new ProfileResponse
             {
-                user.Username,
-                user.Email
+                Username = user.Username,
+                Email = user.Email,
+                Household = user.Household,
+                HouseholdKey = user.HouseholdKey
             });
         })
         .WithName("GetCurrentUser")

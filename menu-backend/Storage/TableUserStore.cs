@@ -24,8 +24,8 @@ public sealed class TableUserStore : IUserStore
             return null;
         }
 
-        UserEntity? e = entity.Value;
-        return new User(e.RowKey, e.Email);
+        UserEntity? value = entity.Value;
+        return new User(value.RowKey, value.Email, value.Household, value.HouseholdKey);
     }
 
     public async Task<User?> VerifyPassword(string username, string password)
@@ -44,7 +44,7 @@ public sealed class TableUserStore : IUserStore
             return null;
         }
 
-        return new User(value.RowKey, value.Email);
+        return new User(value.RowKey, value.Email, value.Household, value.HouseholdKey);
     }
 
     public async Task SaveAsync(User user, string password)
