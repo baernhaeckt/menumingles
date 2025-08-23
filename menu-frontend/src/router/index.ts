@@ -34,6 +34,11 @@ const router = createRouter({
       name: 'swipe',
       component: () => import('../views/swipe/Swipe.vue'),
     },
+    {
+      path: '/household/week',
+      name: 'menu-plan',
+      component: () => import('../views/household/WeekPlan.vue'),
+    },
   ],
 })
 

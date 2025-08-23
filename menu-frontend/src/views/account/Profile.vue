@@ -59,7 +59,15 @@ const copyInviteLink = async () => {
           You're part of <span class="text-red-600">"{{ householdName }}"</span>
         </h1>
       </div>
-      <div class="ms-auto">
+      <div class="ms-auto flex items-center gap-2 flex-row">
+        <RouterLink to="/household/week">
+          <button
+            class="rounded-2xl bg-red-600 hover:bg-red-700 px-6 py-4 text-white font-bold cursor-pointer flex flex-row gap-2 items-center"
+          >
+            <i class="ti ti-burger text-2xl"></i>
+            Menu Plan
+          </button>
+        </RouterLink>
         <button
           @click="logoutAndRedirect"
           class="rounded-2xl bg-red-600 hover:bg-red-700 px-6 py-4 text-white font-bold cursor-pointer flex flex-row gap-2 items-center"
