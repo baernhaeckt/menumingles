@@ -45,6 +45,10 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: menu-backend
+
     steps:
     - uses: actions/checkout@v5
       with:
