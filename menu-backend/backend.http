@@ -1,6 +1,37 @@
 @backend_HostAddress = http://localhost:32776
 
-GET {{backend_HostAddress}}/weatherforecast/
-Accept: application/json
+### Health Check
+GET {{backend_HostAddress}}/health
 
-###
+### Register a new user
+POST {{backend_HostAddress}}/api/v1/auth/register
+Content-Type: application/json
+
+{
+  "username": "newuser",
+  "email": "newuser@example.com",
+  "password": "password123",
+  "confirmPassword": "password123"
+}
+
+### Login
+POST {{backend_HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin123"
+}
+
+### Get current user (requires authentication)
+GET {{backend_HostAddress}}/api/v1/auth/me
+Authorization: Bearer {{authToken}}
+
+### Test with test user
+POST {{backend_HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "password": "test123"
+}

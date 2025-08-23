@@ -1,30 +1,20 @@
+using backend.Api.Endpoints;
+using backend.Setup;
+
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddOpenApi();
-builder.Services.AddEndpointsApiExplorer();
-
-builder.Services.AddSwaggerGen(o =>
-{
-    o.SwaggerDoc("v1", new() { Title = "MenuMingles API", Version = "v1" });
-});
+// Register all services
+builder.RegisterServices();
 
 var app = builder.Build();
 
-// Serve OpenAPI JSON at /docs/v1/swagger.json and UI at /docs
-app.UseSwagger(c =>
-{
-    c.RouteTemplate = "docs/{documentName}/swagger.json";
-});
-app.UseSwaggerUI(c =>
-{
-    c.RoutePrefix = "docs";
-    c.SwaggerEndpoint("/docs/v1/swagger.json", "MenuMingles API v1");
-});
+// Register all middlewares
+app.RegisterMiddlewares();
 
-app.MapOpenApi();
+// Register all endpoints
+app.RegisterAuthEndpoints();
 
-app.UseHttpsRedirection();
-
+// Health check endpoint
 app.MapGet("/health", () =>
 {
     return Results.NoContent();
@@ -32,4 +22,5 @@ app.MapGet("/health", () =>
 
 app.Run();
 
+// Make the implicit Program class public so test projects can access it
 public partial class Program { }
