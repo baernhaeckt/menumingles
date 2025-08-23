@@ -37,13 +37,6 @@ public static class DiscussionEndpoints
             CancellationTokenSource cancellationTokenSource = new();
             cancellationTokenSource.CancelAfter(TimeSpan.FromMinutes(5));
 
-            // TODO: Remove, this is for debugging purposes only
-            //var output = JsonSerializer.Serialize(new DiscussionRequest(
-            //   household.People,
-            //    household.Chef!,
-            //    household.Consultants!,
-            //    selectedMenus));
-
             // Fire and forget that, to return to the UI
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             menuMinglersClient
@@ -57,7 +50,6 @@ public static class DiscussionEndpoints
             .ContinueWith(async response =>
             {
                 await menuResultStore.SaveMenuResult(session.HouseholdKey, session.SessionKey, response.Result!.Results);
-                return response.Result;
             });
 
             return Results.NoContent();
