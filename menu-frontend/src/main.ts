@@ -6,14 +6,18 @@ import { createPinia } from 'pinia'
 import Particles from '@tsparticles/vue3'
 import { loadFull } from 'tsparticles'
 
+import ToastPlugin from 'vue-toast-notification'
+
 import App from './App.vue'
 import router from './router'
 
-const app = createApp(App).use(Particles, {
-  init: async (engine) => {
-    await loadFull(engine)
-  },
-})
+const app = createApp(App)
+  .use(Particles, {
+    init: async (engine) => {
+      await loadFull(engine)
+    },
+  })
+  .use(ToastPlugin)
 
 app.use(createPinia())
 app.use(router)
