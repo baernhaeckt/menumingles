@@ -48,6 +48,11 @@ public static class AuthEndpoints
             {
                 return Results.BadRequest(new { message = "All fields are required" });
             }
+            if (string.IsNullOrEmpty(request.HouseholdKey) &&
+                string.IsNullOrEmpty(request.Household))
+            {
+                return Results.BadRequest(new { message = "Either household or key is required" });
+            }
 
             if (request.Password.Length < 4)
             {
