@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 
+from services.image_service import ImageService
+
 router = APIRouter()
 
 
@@ -17,3 +19,9 @@ def next_menu_sampler(request: Request, top_k: int = 6):
     top_k_recipes = recommender_service.sample_recommendations(top_k)
 
     return JSONResponse(status_code=200, content=top_k_recipes)
+
+@router.get("/menuimage", tags=["api menu image"], status_code=200)
+def generate_menu_image(name: str):
+    image_service = ImageService()
+    return image_service.generate_image(name)
+
