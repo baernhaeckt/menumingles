@@ -28,9 +28,11 @@ public class TableHouseholdStore : IHouseholdStore
             RowKey = householdKey,
             HouseholdKey = householdKey,
             Name = household,
-            People = TemplateHouseholdPeople.People,
-            Chef = TemplateChef.Chef,
-            Consultants = TemplateConsultants.Consultants
+            // Initialize with empty JSON documents
+            // We add them currently as constants since they are too large
+            //People = TemplateHouseholdPeople.People,
+            //Chef = TemplateChef.Chef,
+            //Consultants = TemplateConsultants.Consultants
         }, TableUpdateMode.Replace);
     }
 
@@ -42,9 +44,9 @@ public class TableHouseholdStore : IHouseholdStore
             {
                 HouseholdKey = entity.Value.RowKey,
                 Name = entity.Value.Name,
-                People = JsonDocument.Parse(entity.Value.People),
-                Chef = JsonDocument.Parse(entity.Value.Chef),
-                Consultants = JsonDocument.Parse(entity.Value.Consultants)
+                People = JsonDocument.Parse(TemplateHouseholdPeople.People),
+                Chef = JsonDocument.Parse(TemplateChef.Chef),
+                Consultants = JsonDocument.Parse(TemplateConsultants.Consultants)
             }
             : throw new KeyNotFoundException($"Household with key '{householdKey}' not found.");
     }

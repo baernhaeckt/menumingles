@@ -5,7 +5,6 @@ using backend.Planning.Storage;
 using Microsoft.AspNetCore.Mvc;
 
 using System.Security.Claims;
-using System.Text.Json;
 
 namespace backend.Discussion.Api;
 
@@ -13,10 +12,10 @@ public static class DiscussionEndpoints
 {
     public static void RegisterDiscussionEndpoints(this IEndpointRouteBuilder routes)
     {
-        var plan = routes.MapGroup("/api/v1/discussion");
+        var discuss = routes.MapGroup("/api/v1/discussion");
 
         // Start discussion for planned session endpoint
-        plan.MapPost("/begin", async (
+        discuss.MapPost("/start", async (
             [FromBody] DiscussionStartRequest request,
             IHouseholdStore householdStore,
             IPlanSessionStore sessionStore,
@@ -26,13 +25,18 @@ public static class DiscussionEndpoints
             Household household = await householdStore.GetAsync(user.GetHouseholdKey());
             Session session = await sessionStore.GetSessionAsync(user.GetHouseholdKey());
 
+            CancellationTokenSource cancellationTokenSource = new();
+            cancellationTokenSource.CancelAfter(TimeSpan.FromMinutes(5));
+
             // Fire and forget that, to return to the UI
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             menuMinglersClient
             .DiscussAsync(new DiscussionRequest(
-                JsonSerializer.Deserialize<List<TinyPerson>>(household.People)!,
-                JsonSerializer.Deserialize<Chef>(household.Chef)!,
-                JsonSerializer.Deserialize<List<Consultant>>(household.Consultants)!,
-                JsonSerializer.Deserialize<List<MenuItem>>(session.MenuSelection)!)
+               household.People,
+                household.Chef!,
+                household.Consultants!,
+                session.MenuSelection), cancellationTokenSource.Token
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             )
             .ContinueWith(response =>
             {
@@ -41,9 +45,9 @@ public static class DiscussionEndpoints
 
             return Results.NoContent();
         })
-        .WithName("Begin")
+        .WithName("StartDiscussion")
         .WithOpenApi()
-        .WithTags("Plan")
+        .WithTags("Discussion")
         .RequireAuthorization();
     }
 }

@@ -4,6 +4,7 @@ using backend.Planning.Storage;
 using Microsoft.AspNetCore.Mvc;
 
 using System.Security.Claims;
+using System.Text.Json;
 
 namespace backend.Planning.Api;
 
@@ -21,11 +22,21 @@ public static class PlanningEndpoints
             ClaimsPrincipal user) =>
         {
             // We get from the ingredients we have from the fridge a recommendation for starting menus
-            var result = await recommenderClient.RecommendAsync(request.Ingredients);
+            // Additionally, we get menu suggestions to sample the taste
+            Task<JsonDocument?> fridgeIngredients = recommenderClient.RecommendAsync(request.Ingredients);
+            Task<JsonDocument?> menuSuggestions = recommenderClient.GetMenuSamplerAsync(9);
+            await Task.WhenAll(fridgeIngredients, menuSuggestions);
+            JsonDocument fridgeMenus = await fridgeIngredients;
+            JsonDocument suggestionMenus = await menuSuggestions;
+
+            var fridgeArray = (await fridgeIngredients)!.RootElement.EnumerateArray().Select(e => e.Clone());
+            var suggestionArray = (await menuSuggestions)!.RootElement.EnumerateArray().Select(e => e.Clone());
+            var combinedElements = fridgeArray.Concat(suggestionArray).ToArray();
+            string json = JsonSerializer.Serialize(combinedElements);
 
             // We start a planning session with the user household key, the ingredients and the recommended menus
             // When a user from this household logs in, he can continue this session and plan a menue
-            string sessionKey = await planSessionStore.StartSessionAsync(user.GetHouseholdKey(), request.Ingredients, result.RootElement.GetRawText());
+            string sessionKey = await planSessionStore.StartSessionAsync(user.GetHouseholdKey(), request.Ingredients, json);
 
             // We notify the users that the planning session has started (i.e., the fridge send a msg)
             // TODO: REST API to send notification into the chat (other system has websocket)

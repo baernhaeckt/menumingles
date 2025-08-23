@@ -43,9 +43,9 @@ public class RecommenderClient
     /// <summary>
     /// GET /api/v1/menu/menusampler – Next Menu Sampler
     /// </summary>
-    public async Task<JsonDocument?> GetMenuSamplerAsync(CancellationToken ct = default)
+    public async Task<JsonDocument?> GetMenuSamplerAsync(int number, CancellationToken ct = default)
     {
-        var response = await _http.GetAsync("/api/v1/menu/menusampler", ct);
+        var response = await _http.GetAsync($"/api/v1/menu/menusampler?top_k={number}", ct);
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<JsonDocument>(cancellationToken: ct);
     }
