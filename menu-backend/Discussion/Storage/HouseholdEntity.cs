@@ -23,5 +23,6 @@ public sealed class HouseholdEntity : ITableEntity
     public string Chef { get; set; }
 
     public string Consultants { get; set; }
+
     public string Name { get; internal set; }
 }

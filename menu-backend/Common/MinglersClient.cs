@@ -38,5 +38,5 @@ public sealed record DiscussionRequest(
 );
 
 public sealed record DiscussionResponse(
-    Dictionary<string, object> Results // schema not fixed
+    JsonElement[] Results // schema not fixed. Contains weekdays
 );
