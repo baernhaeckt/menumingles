@@ -40,7 +40,7 @@ const registerSchema = z
     message: 'Passwords must match',
     path: ['confirmPassword'],
   })
-  .refine((data) => data.householdName.length === 0 && hasInvite.value, {
+  .refine((data) => data.householdName.length > 0 || hasInvite.value, {
     message: 'Household name is required',
     path: ['householdName'],
   })
