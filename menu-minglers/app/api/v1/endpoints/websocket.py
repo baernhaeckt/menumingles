@@ -96,6 +96,7 @@ async def broadcast_message(message: ChatMessage):
     ws_service = get_websocket_service()
     try:
         payload = {
+            "type": message.type,
             "name": message.name,
             "message": message.message
         }

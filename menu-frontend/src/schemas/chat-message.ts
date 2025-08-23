@@ -5,6 +5,7 @@ import { z } from 'zod'
  * Corresponds to the Pydantic ChatMessage model.
  */
 export const ChatMessageSchema = z.object({
+  type: z.enum(['chat', 'fridge']),
   name: z.string(),
   message: z.string(),
   timestamp: z.number().optional()

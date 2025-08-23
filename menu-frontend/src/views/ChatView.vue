@@ -281,11 +281,21 @@ const isOwnMessage = (message: ChatMessage) => {
                     ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white'
                     : 'bg-white text-slate-800 border border-slate-200'
                 ]">
-              <p class="text-sm leading-relaxed pr-0 pb-3 mb-0">{{ message.message }}</p>
+              <p class="text-sm leading-relaxed pr-0 pb-3 mb-0">
+                <template v-if="message.type === 'fridge'">
+                  <p class="mb-2">{{ message.message }}</p>
+                  <a href="/swipe"
+                     class="rounded-2xl mb-2 bg-red-600 hover:bg-red-700 px-6 py-2 text-white font-bold cursor-pointer w-full flex flex-row justify-center items-center gap-2 outline-4 outline-transparent outline-solid outline-offset-2 focus-visible:outline-red-200">
+                    <i class="ti ti-arrow-right"></i> Start planning now
+                  </a>
+                </template>
+                <template v-else>
+                  {{ message.message }}
+                </template>
+              </p>
 
               <!-- Timestamp inside bubble -->
-              <div
-                   :class="[
+              <div :class="[
                     'text-xs absolute bottom-1 right-4',
                     isOwnMessage(message) ? 'text-blue-100' : 'text-slate-400'
                   ]">
@@ -301,18 +311,12 @@ const isOwnMessage = (message: ChatMessage) => {
     <div class="flex-shrink-0 bg-white border-t border-slate-200 px-6 py-4">
       <div class="flex items-end gap-3">
         <div class="flex-1 relative">
-          <input
-                 v-model="newMessage"
-                 @keypress="handleKeyPress"
-                 type="text"
-                 :disabled="connectionStatus !== 'connected'"
+          <input v-model="newMessage" @keypress="handleKeyPress" type="text" :disabled="connectionStatus !== 'connected'"
                  class="w-full px-4 py-3 pr-12 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                  placeholder="Type your message..." />
         </div>
 
-        <button
-                @click="sendMessage"
-                :disabled="!newMessage.trim() || connectionStatus !== 'connected'"
+        <button @click="sendMessage" :disabled="!newMessage.trim() || connectionStatus !== 'connected'"
                 class="flex-shrink-0 w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 disabled:from-slate-300 disabled:to-slate-400 disabled:cursor-not-allowed text-white rounded-2xl flex items-center justify-center transition-all shadow-lg hover:shadow-xl">
           <IconSend class="w-5 h-5" />
         </button>
