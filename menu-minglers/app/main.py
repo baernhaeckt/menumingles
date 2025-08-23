@@ -1,5 +1,8 @@
 """FastAPI application entry point."""
 
+import asyncio
+from contextlib import asynccontextmanager
+
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -8,6 +11,7 @@ from fastapi.responses import JSONResponse
 from app.api.v1.router import api_router
 from app.config import settings
 from app.core.logging import log_exception_handler, logger
+from app.services.websocket_service import WebSocketService
 
 load_dotenv()
 
@@ -40,6 +44,39 @@ if isinstance(getattr(Document, "text", None), property) and Document.text.fset 
     Document.text = property(_getter, _set_text)
 # ---- end hack ----
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Application lifespan manager for startup and shutdown events."""
+    # Startup
+    logger.log_info("Starting Menu Minglers application...")
+
+    # Initialize WebSocket service
+    websocket_service = WebSocketService.get_instance()
+    websocket_service.initialize_server(host="localhost", port=8765)
+
+    # Start WebSocket server in background task
+    websocket_task = asyncio.create_task(websocket_service.start_server())
+
+    logger.log_info("Application startup complete")
+
+    yield
+
+    # Shutdown
+    logger.log_info("Shutting down Menu Minglers application...")
+
+    # Stop WebSocket server
+    if websocket_service.is_initialized():
+        await websocket_service.stop_server()
+        websocket_task.cancel()
+        try:
+            await websocket_task
+        except asyncio.CancelledError:
+            pass
+
+    logger.log_info("Application shutdown complete")
+
+
 # Create FastAPI application
 app = FastAPI(
     title=settings.app_name,
@@ -48,6 +85,7 @@ app = FastAPI(
     docs_url=settings.docs_url,
     redoc_url=settings.redoc_url,
     debug=settings.debug,
+    lifespan=lifespan,
 )
 
 # Add CORS middleware
@@ -76,5 +114,6 @@ async def root():
         "message": "Welcome to Menu Minglers API",
         "version": settings.app_version,
         "docs": "/docs",
-        "health": f"{settings.api_v1_prefix}/health"
+        "health": f"{settings.api_v1_prefix}/health",
+        "websocket": f"{settings.api_v1_prefix}/ws"
     }

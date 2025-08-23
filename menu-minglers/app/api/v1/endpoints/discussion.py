@@ -1,5 +1,7 @@
 """Discussion endpoints."""
 
+import asyncio
+
 from fastapi import APIRouter, HTTPException, Request, status
 
 from app.core.logging import logger
@@ -37,6 +39,17 @@ router = APIRouter()
         }
     }
 )
+def discuss_menus_blocking(request: DiscussionRequest) -> dict:
+    discussion_manager = DiscussionManager()
+
+    return discussion_manager.discuss_menus(
+        people=request.people,
+        chef=request.chef,
+        consultants=request.consultants,
+        menu=request.menu
+    )
+
+
 async def discuss_topic(request: DiscussionRequest, http_request: Request) -> DiscussionResponse:
     """
     Start a discussion between people about a specific topic.
@@ -51,8 +64,6 @@ async def discuss_topic(request: DiscussionRequest, http_request: Request) -> Di
     Raises:
         HTTPException: If discussion fails
     """
-    discussion_manager = DiscussionManager()
-
     # Log the start of the discussion
     logger.log_info(
         "Starting discussion over the given menu",
@@ -66,13 +77,7 @@ async def discuss_topic(request: DiscussionRequest, http_request: Request) -> Di
 
     try:
         # Call the discussion manager with the specified constraints
-
-        result = discussion_manager.discuss_menus(
-            people=request.people,
-            chef=request.chef,
-            consultants=request.consultants,
-            menu=request.menu
-        )
+        result = await asyncio.to_thread(discuss_menus_blocking, request)
 
         # Log successful completion
         logger.log_info(

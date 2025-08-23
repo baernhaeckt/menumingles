@@ -13,6 +13,7 @@ uvicorn = {extras = ["standard"], version = "^0.32.1"}
 pydantic = "^2.10.4"
 pydantic-settings = "^2.8.0"
 python-dotenv = "^1.0.0"
+websockets = "^13.0"
 tinytroupe = { git = "https://github.com/microsoft/TinyTroupe.git", tag = "v0.5.2" }
 torch = { version = "2.7.1+cpu", source = "pytorch-cpu" }
 

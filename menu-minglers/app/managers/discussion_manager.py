@@ -1,4 +1,6 @@
 
+import asyncio
+
 import tinytroupe
 from tinytroupe.agent import TinyPerson
 from tinytroupe.environment import TinySocialNetwork, TinyWorld
@@ -6,6 +8,8 @@ from tinytroupe.extraction import ResultsExtractor
 from tinytroupe.factory import TinyPersonFactory
 
 from app.core.logging import logger
+from app.managers.discussion_websocket_logger import DiscussionWebsocketLogger
+from app.services.websocket_service import WebSocketService
 
 
 class DiscussionManager:
@@ -68,7 +72,7 @@ Extract the final weekly menu (one menu per day) as a SINGLE JSON object with EX
     """
 
     def __init__(self):
-        pass
+        self.websocket_service = WebSocketService.get_instance()
 
     def discuss_menus(self, people: list[dict], chef: dict, consultants: list[dict], menu: list[dict]) -> dict:
         """Start a menu discussion with the given participants and menu."""
@@ -120,6 +124,11 @@ Extract the final weekly menu (one menu per day) as a SINGLE JSON object with EX
             logger.log_debug("Creating focus group")
             focus_group = TinyWorld("Group chat for menu discussion", persons)
             logger.log_info("Focus group created successfully")
+
+            # Create websocket logger
+            websocket_logger = DiscussionWebsocketLogger(
+                focus_group, self.websocket_service)
+            websocket_logger.start_logging()
 
             # Prepare discussion content
             menu_description = self.menu_description_template.format(menu=menu)
@@ -188,6 +197,8 @@ Constraints:
             logger.log_info("Results extracted successfully", additional_context={
                 "result_keys": list(results.keys()) if isinstance(results, dict) else "No results"
             })
+
+            websocket_logger.end_logging()
 
             return results
 
