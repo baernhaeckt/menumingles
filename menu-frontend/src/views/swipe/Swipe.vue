@@ -25,6 +25,40 @@ const cards = ref([
 
 const topIndex = computed(() => cards.value.length - 1)
 
+// Container ref to find the current top card element for programmatic swipes
+const deck = ref<HTMLElement | null>(null);
+
+// Programmatic swipe via buttons: animate the top card off-screen with same feel
+function swipeByButton(direction: 'left' | 'right') {
+  const el = deck.value?.querySelector('.item') as HTMLElement | null
+  if (!el) return
+
+  // ensure a baseline transform state
+  if (!el.dataset.x) setTransform(el, 0)
+
+  const container = el.parentElement
+  const width = container?.getBoundingClientRect().width || window.innerWidth
+  const dir = direction === 'right' ? 1 : -1
+  const offscreenX = dir * (width * 1.2)
+  const x = getX(el)
+
+  // Duration proportional to remaining distance for a snappy feel
+  const remaining = Math.min(Math.abs(offscreenX - x), width * 1.2)
+  const duration = Math.max(160, Math.min(320, (remaining / (width * 1.2)) * 280))
+
+  el.style.transition = `transform ${duration}ms cubic-bezier(.22,.61,.36,1)`
+  setTransform(el, offscreenX)
+
+  const onEnd = () => {
+    el.removeEventListener('transitionend', onEnd)
+    if (dir > 0) onSwipeRight()
+    else onSwipeLeft()
+    // Remove the top card after the animation completes
+    cards.value.pop()
+  }
+  el.addEventListener('transitionend', onEnd, { once: true })
+}
+
 function setTransform(el: HTMLElement, x: number) {
   el.style.transform = `translate(${x}px, 0px)`
   el.dataset.x = String(x)
@@ -100,7 +134,7 @@ interact('.item').draggable({
 
 <template>
   <div class="grow pt-6 flex flex-col">
-    <div class="grow h-full w-full relative overflow-hidden">
+    <div class="grow h-full w-full relative overflow-hidden" ref="deck">
       <div
         v-for="(card, i) in cards"
         :key="card.id"
@@ -153,11 +187,13 @@ interact('.item').draggable({
   </div>
   <div class="p-10 py-6 flex flex-row justify-between">
     <button
+      @click="swipeByButton('left')"
       class="bg-red-600 rounded-full aspect-square h-16 text-white flex items-center justify-center outline-4 outline-transparent outline-solid outline-offset-2 focus-visible:outline-red-200"
     >
       <i class="ti ti-x text-4xl"></i>
     </button>
     <button
+      @click="swipeByButton('right')"
       class="bg-green-600 rounded-full aspect-square h-16 text-white flex items-center justify-center outline-4 outline-transparent outline-solid outline-offset-2 focus-visible:outline-green-200"
     >
       <i class="ti ti-heart-filled text-4xl"></i>
