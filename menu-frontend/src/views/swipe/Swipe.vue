@@ -59,7 +59,7 @@ interact('.item').draggable({
       const container = target.parentElement
       const width = container?.getBoundingClientRect().width || window.innerWidth
 
-      const threshold = width * 0.5;
+      const threshold = width * 0.3;
 
       // Velocity-based projection (px/s -> project over ~250ms)
       const vx = event.velocityX || 0
