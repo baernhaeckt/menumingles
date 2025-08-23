@@ -339,7 +339,7 @@ const particleConfig = {
 
       <div v-if="!hasInvite" class="md:w-1/2! mx-auto mb-5">
         <label class="text-neutral-600" for="household-name"
-          >Username <span class="text-orange-500">*</span></label
+          >Household name <span class="text-orange-500">*</span></label
         >
         <input
           id="household-name"
