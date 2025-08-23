@@ -39,7 +39,7 @@ interact('.item').draggable({
   lockAxis: 'x',
   inertia: {
     // lower resistance = longer glide
-    resistance: 15,     // default ~20; try 5–15 for more momentum
+    resistance: 4,     // default ~20; try 5–15 for more momentum
     minSpeed: 20,      // px/s needed to trigger inertia (raise to require a "flick")
     endSpeed: 4,       // px/s where inertia stops
     allowResume: true,  // let users grab the card again mid-inertia
@@ -85,7 +85,7 @@ interact('.item').draggable({
 
 <template>
   <div class="grow pt-6 flex flex-col">
-    <div class="grow bg-blue-600 h-full w-full relative">
+    <div class="grow bg-blue-600 h-full w-full relative overflow-hidden">
       <div class="absolute w-full h-full item px-6 pt-3">
         <div
           class="h-full bg-neutral-300 shadow-xl border border-neutral-400 border-solid rounded-3xl p-5"
