@@ -52,5 +52,13 @@ useHead({
         Account Profile
       </button>
     </RouterLink>
+
+    <RouterLink to="/swipe">
+      <button
+        class="rounded-2xl bg-red-600 px-6 py-4 text-white font-bold cursor-pointer text-center w-full"
+      >
+        Swipe
+      </button>
+    </RouterLink>
   </div>
 </template>

@@ -15,11 +15,17 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "@interactjs/actions": "^1.10.27",
+    "@interactjs/auto-start": "^1.10.27",
+    "@interactjs/dev-tools": "^1.10.27",
+    "@interactjs/interact": "^1.10.27",
+    "@interactjs/modifiers": "^1.10.27",
     "@tabler/icons-vue": "^3.34.1",
     "@tabler/icons-webfont": "^3.34.1",
     "@tailwindcss/vite": "^4.1.12",
     "@tsparticles/vue3": "^3.0.1",
     "@unhead/vue": "^2.0.14",
+    "interactjs": "^1.10.27",
     "pinia": "^3.0.3",
     "qrcode.vue": "^3.6.0",
     "tailwindcss": "^4.1.12",
@@ -29,6 +35,7 @@
     "vue-toast-notification": "^3.1.3"
   },
   "devDependencies": {
+    "@interactjs/types": "^1.10.27",
     "@tsconfig/node22": "^22.0.2",
     "@types/node": "^22.16.5",
     "@vitejs/plugin-vue": "^6.0.1",

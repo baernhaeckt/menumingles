@@ -28,9 +28,11 @@ const router = createRouter({
       path: '/account/profile',
       name: 'account-profile',
       component: () => import('../views/account/Profile.vue'),
-      meta: {
-        title: 'Profile',
-      }
+    },
+    {
+      path: '/swipe',
+      name: 'swipe',
+      component: () => import('../views/swipe/Swipe.vue'),
     },
   ],
 })
