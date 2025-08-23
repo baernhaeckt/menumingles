@@ -142,12 +142,12 @@ interact('.item').draggable({
         class="absolute w-full h-full px-6 pt-3 pb-6"
       >
         <div
-          class="h-full bg-neutral-300 shadow-xl border border-neutral-400 border-solid rounded-3xl p-5"
+          class="h-full max-w-[500px] mx-auto bg-red bg-neutral-300 shadow-xl border border-neutral-400 border-solid rounded-3xl p-5"
         >
           <div class="flex flex-col gap-8 h-full">
             <div class="grow relative flex items-center justify-center">
               <div
-                class="absolute w-5/7 -translate-x-14 -translate-y-22 md:-translate-x-48 md:-translate-y-32 bg-black md:w-1/2 aspect-video rounded-3xl overflow-hidden"
+                class="absolute w-5/7 -translate-x-14 -translate-y-22 md:-translate-x-20 md:-translate-y-24 md:w-1/2 aspect-video rounded-3xl overflow-hidden"
               >
                 <img
                   src="@/assets/placeholer-food/chiken.jpg"
@@ -156,7 +156,7 @@ interact('.item').draggable({
                 />
               </div>
               <div
-                class="absolute w-6/8 translate-x-12 translate-y-0 md:translate-x-44 bg-black md:w-1/2 aspect-video rounded-3xl overflow-hidden"
+                class="absolute w-6/8 translate-x-12 translate-y-0 md:translate-x-32 md:w-1/2 aspect-video rounded-3xl overflow-hidden"
               >
                 <img
                   src="@/assets/placeholer-food/noodles.jpg"
@@ -165,7 +165,7 @@ interact('.item').draggable({
                 />
               </div>
               <div
-                class="absolute w-5/7 -translate-x-7 translate-y-24 md:-translate-x-30 md:translate-y-32 bg-black md:w-1/2 aspect-video rounded-3xl overflow-hidden"
+                class="absolute w-5/7 -translate-x-7 translate-y-24 md:-translate-x-22 md:translate-y-18 md:w-1/2 aspect-video rounded-3xl overflow-hidden"
               >
                 <img
                   src="@/assets/placeholer-food/pot.jpg"
