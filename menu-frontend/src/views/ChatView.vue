@@ -143,8 +143,6 @@ const manualReconnect = async () => {
       </button>
     </div>
 
-    <pre>{{ messages }}</pre>
-
     <!-- Messages Container -->
     <div v-if="messages.length === 0" class="flex-1 flex items-center justify-center text-neutral-500">
       <p>No messages yet. Start a conversation!</p>
