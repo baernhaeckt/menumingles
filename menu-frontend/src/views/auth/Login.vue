@@ -9,6 +9,7 @@ import { getErrorMessage } from '@/schemas/backend-error.ts'
 import { useCookies } from '@vueuse/integrations/useCookies'
 import { useToast } from 'vue-toast-notification'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth.ts'
 
 useHead({
   title: 'Login • Menu Mingles',
@@ -25,7 +26,6 @@ useHead({
   ],
 });
 
-const cookies = useCookies(['menu-session']);
 const router = useRouter();
 
 const loginSchema = z.object({
@@ -51,6 +51,8 @@ function validateForm(): boolean {
   return validate<RegisterForm>(loginSchema, form, fieldErrors)
 }
 
+const { loginWithToken } = useAuthStore();
+
 async function onSubmit() {
   if (!validateForm()) return
   submitting.value = true
@@ -63,9 +65,7 @@ async function onSubmit() {
     const toast = useToast();
 
     const response = await httpClient.post<string>('/v1/auth/login', payload);
-    cookies.set('menu-session', response.data, {
-      sameSite: 'lax'
-    });
+    loginWithToken(response.data);
     toast.success('Logged in successfully');
     await router.push({ name: 'home' });
   } catch (error) {

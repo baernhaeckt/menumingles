@@ -2,14 +2,15 @@
 import { QrcodeSvg } from 'qrcode.vue'
 import { useToast } from 'vue-toast-notification'
 import { useHead } from '@unhead/vue'
+import { useAuthStore } from '@/stores/auth.ts'
 
 const copyInviteLink = async () => {
   await navigator.clipboard.writeText(
     'https://menu-mingles-frontend-cccnfba0ezc2dhbc.northeurope-01.azurewebsites.net/auth/register?householdInviteCode=23892',
   )
 
-  const $toast = useToast()
-  $toast.success('<i class="ti ti-circle-check-filled"></i> Invite link copied to clipboard')
+  const toast = useToast()
+  toast.success('<i class="ti ti-circle-check-filled"></i> Invite link copied to clipboard')
 }
 
 useHead({
@@ -25,7 +26,9 @@ useHead({
       rel: 'icon',
     }
   ]
-})
+});
+
+const { user } = useAuthStore();
 </script>
 
 <template>
@@ -37,7 +40,7 @@ useHead({
         class="w-24 h-24 rounded-full border-2 border-neutral-700"
       />
       <div>
-        <h1 class="text-3xl font-poetsen-one text-red-600">peter@xyz.xyz</h1>
+        <h1 class="text-3xl font-poetsen-one text-red-600">{{ user?.username }}</h1>
         <h1 class="text-lg text-neutral-600">
           You're part of <span class="text-red-600">"WG Bern"</span>
         </h1>

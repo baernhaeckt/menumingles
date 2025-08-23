@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useHead } from '@unhead/vue'
+import { useAuthStore } from '@/stores/auth.ts'
 
 useHead({
   title: 'Home • Menu Mingles',
@@ -15,6 +16,8 @@ useHead({
     },
   ],
 })
+
+const {isAuthenticated} = useAuthStore();
 </script>
 
 <template>
@@ -45,7 +48,7 @@ useHead({
       </RouterLink>
     </div>
 
-    <RouterLink to="/account/profile">
+    <RouterLink v-if="isAuthenticated" to="/account/profile">
       <button
         class="rounded-2xl bg-red-600 px-6 py-4 text-white font-bold cursor-pointer text-center w-full"
       >

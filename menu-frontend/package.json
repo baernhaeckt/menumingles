@@ -29,6 +29,7 @@
     "@vueuse/core": "^13.7.0",
     "@vueuse/integrations": "^13.7.0",
     "axios": "^1.11.0",
+    "dayjs": "^1.11.13",
     "interactjs": "^1.10.27",
     "pinia": "^3.0.3",
     "qrcode.vue": "^3.6.0",
