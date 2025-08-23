@@ -37,13 +37,7 @@ function animateTo(el: HTMLElement, x: number) {
 
 interact('.item').draggable({
   lockAxis: 'x',
-  inertia: {
-    // lower resistance = longer glide
-    resistance: 12,     // default ~20; try 5–15 for more momentum
-    minSpeed: 10,      // px/s needed to trigger inertia (raise to require a "flick")
-    endSpeed: 2,       // px/s where inertia stops
-    allowResume: true,  // let users grab the card again mid-inertia
-  },
+  inertia: false,
   listeners: {
     start(event) {
       const target = event.target as HTMLElement
@@ -61,23 +55,44 @@ interact('.item').draggable({
       const target = event.target as HTMLElement
       const x = getX(target)
 
-      // Threshold: 80% of viewport width
-      const threshold = window.innerWidth * 0.8
+      // Use container width if available; fallback to viewport
+      const container = target.parentElement
+      const width = container?.getBoundingClientRect().width || window.innerWidth
 
-      if (Math.abs(x) >= threshold) {
-        // Animate off-screen and signal
-        const direction = x > 0 ? 1 : -1
-        const offscreenX = direction * window.innerWidth * 1.2 // push a bit farther than edge
-        animateTo(target, offscreenX)
-        // Trigger callback
+      const threshold = width * 0.8
+
+      // Velocity-based projection (px/s -> project over ~250ms)
+      const vx = event.velocityX || 0
+      const PROJECTION_TIME = 0.25 // seconds
+      const MAX_EXTRA = width * 0.5 // cap extra distance
+      const projected = x + Math.max(-MAX_EXTRA, Math.min(MAX_EXTRA, vx * PROJECTION_TIME))
+
+      // Consider as "flick" if speed is high enough
+      const FLICK_SPEED = 350 // px/s
+      const isFlick = Math.abs(vx) >= FLICK_SPEED
+
+      // Decide with projection (for flicks) or current x (for slow releases)
+      const decideX = isFlick ? projected : x
+
+      if (Math.abs(decideX) >= threshold) {
+        const direction = decideX > 0 ? 1 : -1
+        const offscreenX = direction * (width * 1.2)
+
+        // Duration proportional to remaining distance for a snappy feel
+        const remaining = Math.min(Math.abs(offscreenX - x), width * 1.2)
+        const duration = Math.max(160, Math.min(320, (remaining / (width * 1.2)) * 280))
+
+        target.style.transition = `transform ${duration}ms cubic-bezier(.22,.61,.36,1)`
+        setTransform(target, offscreenX)
+
         if (direction > 0) onSwipeRight()
         else onSwipeLeft()
-        // Optionally: reset after animation for next card (if applicable)
-        // setTimeout(() => setTransform(target, 0), 320)
       } else {
-        // Snap back to center
-        animateTo(target, 0)
+        // Snap back immediately, no delay
+        target.style.transition = 'transform 220ms cubic-bezier(.22,.61,.36,1)'
+        setTransform(target, 0)
       }
+
     },
   },
 })
