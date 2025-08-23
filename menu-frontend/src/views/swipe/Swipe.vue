@@ -69,7 +69,7 @@ async function continuePlanningAsync() {
  * @see continuePlanning must be called first to retrieve the sessionKey and the menu selection.
  */
 async function selectMenuItemsAsync(request: { sessionKey: string; menuSelection: string[] }) {
-  const response = await httpClient.post('v1/planning/continue', request, {
+  const response = await httpClient.post('v1/planning/selection', request, {
     headers: {
       Authorization: `Bearer ${auth.token}`,
     },
