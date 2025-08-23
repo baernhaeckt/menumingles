@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { getWebSocketClient } from "@/client/websocket-client";
-import { ChatMessage, ChatMessageSchema } from "@/schemas/chat-message";
+import { type ChatMessage, ChatMessageSchema } from "@/schemas/chat-message";
 import { IconFridge, IconSend, IconUser } from "@tabler/icons-vue";
 import { useHead } from '@unhead/vue';
 
 import { onMounted, onUnmounted, ref } from 'vue';
-import { ZodSafeParseResult } from "zod";
+import { type ZodSafeParseResult } from "zod";
 
 useHead({
   title: 'Chat • Menu Mingles',
