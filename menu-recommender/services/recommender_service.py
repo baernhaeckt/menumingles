@@ -36,8 +36,8 @@ class RecommenderService:
 
         return self._calculate_top_k_recipes(query_recipe_ingredients, top_k)
 
-    def sample_recommendations(self) -> list:
+    def sample_recommendations(self, top_k) -> list:
         # Create random sample of ingredients
         query_recipe_ingredients = sample(list(self.ingredient_vocab.values()), k=5)
 
-        return self._calculate_top_k_recipes(query_recipe_ingredients, 5)
+        return self._calculate_top_k_recipes(query_recipe_ingredients, top_k)
