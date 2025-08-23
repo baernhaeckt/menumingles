@@ -12,16 +12,8 @@ def inventory_recommender(request: Request, ingredients: list[str]):
     return JSONResponse(status_code=200, content={"top_recipes": top_k_recipes})
 
 @router.get("/menusampler", tags=["api menu recommender"], status_code=200)
-def next_menu_sampler():
-    return JSONResponse(status_code=200, content={"dishes": [
-        {
-            "dish_name": "Chicken Stir Fry with Bun",
-            "ingredients": ["chicken", "rice"]
-        },
-        {
-            "dish_name": "Spaghetti with Tomato Sauce",
-            "ingredients": ["potatoes", "water"]
-        }
-    ]})
+def next_menu_sampler(request: Request):
+    recommender_service = request.app.state.recommender_service
+    top_k_recipes = recommender_service.sample_recommendations()
 
-
+    return JSONResponse(status_code=200, content={"top_recipes": top_k_recipes})

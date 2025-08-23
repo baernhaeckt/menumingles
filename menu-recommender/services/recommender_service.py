@@ -1,5 +1,6 @@
 import torch
 from torch.functional import F
+from random import sample
 
 
 class RecommenderService:
@@ -9,9 +10,7 @@ class RecommenderService:
         self.ingredient_vocab = ingredient_vocab
         self.recipe_dataset = recipe_dataset
 
-    def get_recommendations(self, ingredients: list[str], top_k=3) -> list:
-        # Create query embedding
-        query_recipe_ingredients = [self.ingredient_vocab[i] for i in ingredients]
+    def _calculate_top_k_recipes(self, query_recipe_ingredients: list, top_k: int) -> list:
         query_embedding = self.model([query_recipe_ingredients])
 
         # Calculate the topk
@@ -30,3 +29,15 @@ class RecommenderService:
             )
 
         return recipe_recommendations
+
+    def get_recommendations(self, ingredients: list[str], top_k=3) -> list:
+        # Create query embedding
+        query_recipe_ingredients = [self.ingredient_vocab[i] for i in ingredients]
+
+        return self._calculate_top_k_recipes(query_recipe_ingredients, top_k)
+
+    def sample_recommendations(self) -> list:
+        # Create random sample of ingredients
+        query_recipe_ingredients = sample(list(self.ingredient_vocab.values()), k=5)
+
+        return self._calculate_top_k_recipes(query_recipe_ingredients, 5)
