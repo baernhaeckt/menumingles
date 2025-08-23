@@ -37,7 +37,7 @@ public static class PlanningEndpoints
         .WithTags("Plan")
         .RequireAuthorization();
 
-        // Start planning session endpoint
+        // Continue planning session endpoint
         plan.MapPost("/continue", async (
             IPlanSessionStore planSessionStore,
             ClaimsPrincipal user) =>
@@ -59,7 +59,7 @@ public static class PlanningEndpoints
         .RequireAuthorization();
 
 
-        // Start planning session endpoint
+        // Menu selection made endpoint
         plan.MapPost("/selection", async (
             [FromBody] SelectionRequest request,
             IPlanSessionStore planSessionStore,

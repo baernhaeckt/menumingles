@@ -46,9 +46,15 @@ public static class InfrastructureRegistrations
         // Add authorization
         builder.Services.AddAuthorization();
 
+        // Register HTTP clients for software solution services
         builder.Services.AddHttpClient<RecommenderClient>(c =>
         {
             c.BaseAddress = new Uri("https://menu-mingles-recommender-dacue6bacweac5es.northeurope-01.azurewebsites.net");
+        });
+
+        builder.Services.AddHttpClient<MenuMinglersClient>(c =>
+        {
+            c.BaseAddress = new Uri("https://menu-mingles-minglers-brcebbdfb5cefdh8.northeurope-01.azurewebsites.net/");
         });
 
         // Add OpenAPI and Swagger

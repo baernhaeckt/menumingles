@@ -1,6 +1,8 @@
 using backend;
 using backend.Auth;
 using backend.Auth.Api;
+using backend.Discussion;
+using backend.Discussion.Api;
 using backend.Planning;
 using backend.Planning.Api;
 
@@ -12,6 +14,7 @@ builder.RegisterInfrastructureServices();
 // Register all features
 builder.RegisterAuthServices();
 builder.RegisterPlanningServices();
+builder.RegisterHouseholdServices();
 
 var app = builder.Build();
 
@@ -21,6 +24,7 @@ app.RegisterMiddlewares();
 // Register all endpoints
 app.RegisterAuthEndpoints();
 app.RegisterPlanningEndpoints();
+app.RegisterDiscussionEndpoints();
 
 // Health check endpoint
 app.MapGet("/health", () =>

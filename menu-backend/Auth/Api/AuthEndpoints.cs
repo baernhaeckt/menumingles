@@ -1,5 +1,6 @@
 using backend.Auth.Security;
 using backend.Auth.Storage;
+using backend.Discussion.Storage;
 
 using Microsoft.AspNetCore.Mvc;
 
@@ -39,6 +40,7 @@ public static class AuthEndpoints
         // Register endpoint
         auth.MapPost("/register", async (
             [FromBody] RegisterRequest request,
+            IHouseholdStore householdStore,
             IUserStore userStore) =>
         {
             if (string.IsNullOrEmpty(request.Username) || 
@@ -67,6 +69,7 @@ public static class AuthEndpoints
 
             string householdKey = request.HouseholdKey ?? Guid.NewGuid().ToString();
             await userStore.SaveAsync(new User(request.Username, request.Email, request.Household, householdKey), request.Password);
+            await householdStore.CreateIfNotExistsAsync(request.Household, householdKey);
 
             return Results.Ok(new { message = "User registered successfully" });
         })
