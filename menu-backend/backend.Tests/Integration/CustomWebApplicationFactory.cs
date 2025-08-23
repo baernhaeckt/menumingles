@@ -1,7 +1,9 @@
 ﻿using backend.Auth.Storage;
+using backend.Discussion.Storage;
 
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.Session;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace backend.Tests.Integration;
@@ -21,6 +23,13 @@ public class CustomWebApplicationFactory<TProgram>
 
             services.AddSingleton<IUserStore, InMemoryUserStore>();
 
+            var householdStoreRegistration = services.SingleOrDefault(
+                d => d.ServiceType ==
+                    typeof(IHouseholdStore));
+
+            services.Remove(householdStoreRegistration);
+
+            services.AddSingleton<IHouseholdStore, InMemoryHousholdStore>();
         });
 
         builder.UseEnvironment("Development");
