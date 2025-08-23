@@ -2,8 +2,9 @@
 
 from typing import List
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Request
 
+from app.core.logging import logger
 from app.managers.people_manager import PeopleManager
 from app.models.people import (
     AgentPersonGenerationRequest,
@@ -53,12 +54,13 @@ router = APIRouter()
         }
     }
 )
-async def generate_person(request: PersonGenerationRequest) -> PersonResponse:
+async def generate_person(request: PersonGenerationRequest, http_request: Request) -> PersonResponse:
     """
     Generate a person with specific attributes.
 
     Args:
         request: PersonGenerationRequest containing all required attributes
+        http_request: FastAPI request object for logging context
 
     Returns:
         PersonResponse: The generated person with persona data
@@ -67,6 +69,19 @@ async def generate_person(request: PersonGenerationRequest) -> PersonResponse:
         HTTPException: If generation fails
     """
     people_manager = PeopleManager()
+
+    # Log the start of person generation
+    logger.log_info(
+        "Starting person generation",
+        http_request,
+        {
+            "gender": request.gender,
+            "name": request.name,
+            "preferences_count": len(request.preferences),
+            "intolerances_count": len(request.intolerances),
+            "goals_count": len(request.short_term_goals) + len(request.long_term_goals)
+        }
+    )
 
     try:
         # Generate person using the manager
@@ -83,15 +98,35 @@ async def generate_person(request: PersonGenerationRequest) -> PersonResponse:
         persona_data = getattr(tiny_person, '_persona', {})
         person = Persona(persona=persona_data)
 
+        # Log successful generation
+        logger.log_info(
+            "Person generated successfully",
+            http_request,
+            {"person_name": request.name}
+        )
+
         return PersonResponse(
             person=person,
             context=people_manager.family_context.strip()
         )
 
     except Exception as e:
+        # Log the error with full context and stack trace
+        error_id = logger.log_error(
+            e,
+            http_request,
+            {
+                "gender": request.gender,
+                "name": request.name,
+                "preferences_count": len(request.preferences),
+                "intolerances_count": len(request.intolerances),
+                "endpoint": "generate_person"
+            }
+        )
+        
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to generate person: {str(e)}"
+            detail=f"Failed to generate person. Error ID: {error_id}. Contact support with this ID for detailed error information."
         )
 
 
@@ -132,12 +167,13 @@ async def generate_person(request: PersonGenerationRequest) -> PersonResponse:
         }
     }
 )
-async def generate_agent_person(request: AgentPersonGenerationRequest) -> AgentPersonResponse:
+async def generate_agent_person(request: AgentPersonGenerationRequest, http_request: Request) -> AgentPersonResponse:
     """
     Generate an agent person with specific expertise.
 
     Args:
         request: AgentPersonGenerationRequest containing gender, name, and expertise
+        http_request: FastAPI request object for logging context
 
     Returns:
         AgentPersonResponse: The generated agent person with persona data
@@ -146,6 +182,17 @@ async def generate_agent_person(request: AgentPersonGenerationRequest) -> AgentP
         HTTPException: If generation fails
     """
     people_manager = PeopleManager()
+
+    # Log the start of agent person generation
+    logger.log_info(
+        "Starting agent person generation",
+        http_request,
+        {
+            "gender": request.gender,
+            "name": request.name,
+            "expertise": request.expertise
+        }
+    )
 
     try:
         # Generate agent person using the manager
@@ -159,13 +206,32 @@ async def generate_agent_person(request: AgentPersonGenerationRequest) -> AgentP
         persona_data = getattr(tiny_person, '_persona', {})
         agent = Persona(persona=persona_data)
 
+        # Log successful generation
+        logger.log_info(
+            "Agent person generated successfully",
+            http_request,
+            {"agent_name": request.name, "expertise": request.expertise}
+        )
+
         return AgentPersonResponse(
             agent=agent,
             context=people_manager.agent_context.strip()
         )
 
     except Exception as e:
+        # Log the error with full context and stack trace
+        error_id = logger.log_error(
+            e,
+            http_request,
+            {
+                "gender": request.gender,
+                "name": request.name,
+                "expertise": request.expertise,
+                "endpoint": "generate_agent_person"
+            }
+        )
+        
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to generate agent person: {str(e)}"
+            detail=f"Failed to generate agent person. Error ID: {error_id}. Contact support with this ID for detailed error information."
         )

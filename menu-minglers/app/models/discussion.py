@@ -8,15 +8,17 @@ from pydantic import BaseModel, Field
 class DiscussionRequest(BaseModel):
     """Request model for starting a discussion."""
 
-    topic: str = Field(..., description="The topic to discuss")
-    people: List[Dict[str, Any]
-                 ] = Field(..., description="List of people participating in the discussion")
-    initiator: Dict[str, Any] = Field(...,
-                                      description="The initiator of the discussion")
+    people: list[dict] = Field(...,
+                               description="List of people participating in the discussion")
+    chef: dict = Field(...,
+                       description="The kitchen chef that is responsible for the menu")
+    consultants: list[dict] = Field(...,
+                                    description="The consultants that are helping the chef to make the menu")
+    menu: list[dict] = Field(..., description="The menu to discuss")
 
 
 class DiscussionResponse(BaseModel):
     """Response model for discussion results."""
 
-    results: str = Field(...,
-                         description="The consolidated results from the discussion")
+    results: dict = Field(...,
+                          description="The consolidated results from the discussion")

@@ -28,6 +28,12 @@ class Settings(BaseSettings):
     azure_openai_key: str = Field(default="", env="AZURE_OPENAI_KEY")
     azure_openai_endpoint: str = Field(default="", env="AZURE_OPENAI_ENDPOINT")
 
+    # Logging
+    log_level: str = Field(default="INFO", env="LOG_LEVEL")
+    log_file_path: str = Field(default="logs/app.log", env="LOG_FILE_PATH")
+    error_log_file_path: str = Field(default="logs/errors.log", env="ERROR_LOG_FILE_PATH")
+    enable_console_logging: bool = Field(default=True, env="ENABLE_CONSOLE_LOGGING")
+
     class Config:
         """Pydantic config."""
 

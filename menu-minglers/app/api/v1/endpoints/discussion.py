@@ -1,7 +1,8 @@
 """Discussion endpoints."""
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, Request, status
 
+from app.core.logging import logger
 from app.managers.discussion_manager import DiscussionManager
 from app.models.discussion import DiscussionRequest, DiscussionResponse
 
@@ -36,12 +37,13 @@ router = APIRouter()
         }
     }
 )
-async def discuss_topic(request: DiscussionRequest) -> DiscussionResponse:
+async def discuss_topic(request: DiscussionRequest, http_request: Request) -> DiscussionResponse:
     """
     Start a discussion between people about a specific topic.
 
     Args:
         request: DiscussionRequest containing topic, people, and initiator
+        http_request: FastAPI request object for logging context
 
     Returns:
         DiscussionResponse: The consolidated results from the discussion
@@ -51,23 +53,50 @@ async def discuss_topic(request: DiscussionRequest) -> DiscussionResponse:
     """
     discussion_manager = DiscussionManager()
 
+    # Log the start of the discussion
+    logger.log_info(
+        "Starting discussion over the given menu",
+        http_request,
+        {
+            "people_count": len(request.people),
+            "chef_name": request.chef["persona"]["name"],
+            "menu_count": len(request.menu)
+        }
+    )
+
     try:
         # Call the discussion manager with the specified constraints
-        results = discussion_manager.discuss_topic(
-            world_name="Group Chat",
-            situation="A group chat that discuss and modify the dishes / menus of the next week",
-            topic=request.topic,
+
+        result = discussion_manager.discuss_menus(
             people=request.people,
-            initiator=request.initiator,
-            extraction_objective="Consolidate all opinions and create a menu plan for the following week, with the dish names and ingredients for each day. Add remarks to each menu if applicable, if there should be something concerned.",
-            turns=None
+            chef=request.chef,
+            consultants=request.consultants,
+            menu=request.menu
         )
 
-        return DiscussionResponse(results=results)
+        # Log successful completion
+        logger.log_info(
+            "Discussion completed successfully",
+            http_request,
+            result
+        )
+
+        return DiscussionResponse(results=result)
 
     except Exception as e:
-        e.print_exc()
+        # Log the error with full context and stack trace
+        error_id = logger.log_error(
+            e,
+            http_request,
+            {
+                "people_count": len(request.people),
+                "chef_name": request.chef["persona"]["name"],
+                "menu_count": len(request.menu),
+                "endpoint": "discuss_topic"
+            }
+        )
+
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to complete discussion: {str(e)}"
+            detail=f"Failed to complete discussion. Error ID: {error_id}. Contact support with this ID for detailed error information."
         )
