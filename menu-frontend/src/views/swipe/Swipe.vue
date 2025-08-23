@@ -1,20 +1,20 @@
 <script setup lang="ts">
-import '@interactjs/auto-start'
+import { httpClient } from '@/client/http-client.ts'
+import CustomImage from '@/components/CustomImage.vue'
+import ThanksSwiping from '@/components/ThanksSwiping.vue'
+import { API_IMAGE_GEN_URL } from '@/constants.ts'
+import { useAuthStore } from '@/stores/auth.ts'
 import '@interactjs/actions/drag'
 import '@interactjs/actions/drop'
 import '@interactjs/actions/resize'
-import '@interactjs/modifiers'
+import '@interactjs/auto-start'
 import '@interactjs/dev-tools'
 import '@interactjs/inertia'
 import interact from '@interactjs/interact'
+import '@interactjs/modifiers'
 import { computed, onMounted, ref } from 'vue'
-import { httpClient } from '@/client/http-client.ts'
-import { z } from 'zod'
-import { useAuthStore } from '@/stores/auth.ts'
-import { API_IMAGE_GEN_URL } from '@/constants.ts'
 import { useToast } from 'vue-toast-notification'
-import CustomImage from '@/components/CustomImage.vue'
-import ThanksSwiping from '@/components/ThanksSwiping.vue'
+import { z } from 'zod'
 
 function onSwipeLeft() {
   const currentCard = getCurrentCard()
@@ -154,6 +154,7 @@ function swipeByButton(direction: 'left' | 'right') {
     el.removeEventListener('transitionend', onEnd)
     if (dir > 0) onSwipeRight()
     else onSwipeLeft()
+
     // Remove the top card after the animation completes
     cards.value.pop()
 
@@ -189,7 +190,7 @@ interact('.item').draggable({
       target.style.transition = '' // disable transition during drag
       setTransform(target, x)
     },
-    end(event) {
+    async end(event) {
       const target = event.target as HTMLElement
       const x = getX(target)
 
@@ -226,7 +227,12 @@ interact('.item').draggable({
         if (direction > 0) onSwipeRight()
         else onSwipeLeft()
 
+        // Remove the top card after the animation completes
         cards.value.pop()
+
+        if (cards.value.length === 0) {
+          await finishSwipingAsync()
+        }
       } else {
         // Snap back immediately, no delay
         target.style.transition = 'transform 220ms cubic-bezier(.22,.61,.36,1)'
@@ -244,62 +250,57 @@ function getImage(name: string) {
 </script>
 
 <template>
-  <div v-if="cards.length > 0" class="grow pt-6 flex flex-col">
-    <div class="grow h-full w-full relative overflow-hidden" ref="deck">
-      <div
-        v-for="(card, i) in cards"
-        :key="card.id"
-        :class="{ item: i === topIndex, 'pointer-events-none -translate-y-1.5': i !== topIndex }"
-        class="absolute w-full h-full px-6 pt-3 pb-6"
-      >
+  <template v-if="cards.length > 0">
+    <div class="grow pt-6 flex flex-col">
+      <div class="grow h-full w-full relative overflow-hidden" ref="deck">
         <div
-          class="h-full max-w-[500px] mx-auto bg-red bg-neutral-300 shadow-xl border border-neutral-400 border-solid rounded-3xl p-5"
-        >
-          <div class="flex flex-col gap-8 h-full">
-            <div class="grow relative flex items-center justify-center">
-              <div
-                class="absolute w-5/7 -translate-x-14 -translate-y-22 md:-translate-x-20 md:-translate-y-24 md:w-1/2 aspect-video rounded-3xl overflow-hidden"
-              >
-                <CustomImage :src="getImage(card.names[0])" />
+             v-for="(card, i) in cards"
+             :key="card.id"
+             :class="{ item: i === topIndex, 'pointer-events-none -translate-y-1.5': i !== topIndex }"
+             class="absolute w-full h-full px-6 pt-3 pb-6">
+          <div
+               class="h-full max-w-[500px] mx-auto bg-red bg-neutral-300 shadow-xl border border-neutral-400 border-solid rounded-3xl p-5">
+            <div class="flex flex-col gap-8 h-full">
+              <div class="grow relative flex items-center justify-center">
+                <div
+                     class="absolute w-5/7 -translate-x-14 -translate-y-22 md:-translate-x-20 md:-translate-y-24 md:w-1/2 aspect-video rounded-3xl overflow-hidden">
+                  <CustomImage :src="getImage(card.names[0])" />
+                </div>
+                <div
+                     class="absolute w-6/8 translate-x-12 translate-y-0 md:translate-x-32 md:w-1/2 aspect-video rounded-3xl overflow-hidden">
+                  <CustomImage :src="getImage(card.names[1])" />
+                </div>
+                <div
+                     class="absolute w-5/7 -translate-x-7 translate-y-24 md:-translate-x-22 md:translate-y-18 md:w-1/2 aspect-video rounded-3xl overflow-hidden">
+                  <CustomImage :src="getImage(card.names[2])" />
+                </div>
               </div>
-              <div
-                class="absolute w-6/8 translate-x-12 translate-y-0 md:translate-x-32 md:w-1/2 aspect-video rounded-3xl overflow-hidden"
-              >
-                <CustomImage :src="getImage(card.names[1])" />
-              </div>
-              <div
-                class="absolute w-5/7 -translate-x-7 translate-y-24 md:-translate-x-22 md:translate-y-18 md:w-1/2 aspect-video rounded-3xl overflow-hidden"
-              >
-                <CustomImage :src="getImage(card.names[2])" />
-              </div>
-            </div>
 
-            <div>
-              <h5 class="text-3xl text-neutral-900 font-poetsen-one text-center">
-                Do you like this food?
-              </h5>
+              <div>
+                <h5 class="text-3xl text-neutral-900 font-poetsen-one text-center">
+                  Do you like this food?
+                </h5>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-  <div v-if="cards.length > 0" class="p-10 py-6 flex flex-row justify-between">
-    <button
-      @click="swipeByButton('left')"
-      class="bg-red-600 hover:bg-red-700 cursor-pointer rounded-full aspect-square h-16 text-white flex items-center justify-center outline-4 outline-transparent outline-solid outline-offset-2 focus-visible:outline-red-200"
-    >
-      <i class="ti ti-x text-4xl"></i>
-    </button>
-    <button
-      @click="swipeByButton('right')"
-      class="bg-green-600 hover:bg-green-700 cursor-pointer rounded-full aspect-square h-16 text-white flex items-center justify-center outline-4 outline-transparent outline-solid outline-offset-2 focus-visible:outline-green-200"
-    >
-      <i class="ti ti-heart-filled text-4xl"></i>
-    </button>
-  </div>
+    <div class="p-10 py-6 flex flex-row justify-between">
+      <button
+              @click="swipeByButton('left')"
+              class="bg-red-600 hover:bg-red-700 cursor-pointer rounded-full aspect-square h-16 text-white flex items-center justify-center outline-4 outline-transparent outline-solid outline-offset-2 focus-visible:outline-red-200">
+        <i class="ti ti-x text-4xl"></i>
+      </button>
+      <button
+              @click="swipeByButton('right')"
+              class="bg-green-600 hover:bg-green-700 cursor-pointer rounded-full aspect-square h-16 text-white flex items-center justify-center outline-4 outline-transparent outline-solid outline-offset-2 focus-visible:outline-green-200">
+        <i class="ti ti-heart-filled text-4xl"></i>
+      </button>
+    </div>
+  </template>
 
-  <ThanksSwiping v-if="cards.length === 0 && swipingFinished" />
+  <ThanksSwiping v-else-if="swipingFinished" />
 </template>
 
 <style>
