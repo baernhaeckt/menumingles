@@ -1,9 +1,16 @@
 <script setup lang="ts">
 import { useHead } from '@unhead/vue'
-import dayjs from 'dayjs'
 import ShoppingList from '@/components/ShoppingList.vue'
 import CustomImage from '@/components/CustomImage.vue'
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
+import { httpClient } from '@/client/http-client.ts'
+import { useAuthStore } from '@/stores/auth.ts'
+import { z } from 'zod'
+import { calendarMenusSchema } from '@/schemas/calendar-menus.ts'
+import { API_IMAGE_GEN_URL } from '@/constants.ts'
+import dayjs from 'dayjs'
+
+const auth = useAuthStore()
 
 useHead({
   title: 'Week • Menu Mingles',
@@ -20,62 +27,34 @@ useHead({
   ],
 })
 
-const dates = [
-  {
-    date: dayjs().subtract(1, 'days').format('YYYY-MM-DD'),
-    meals: [
-      {
-        name: 'Spaghetti Carbonara',
-        ingredients: ['Italian', 'Antipasta', 'Sauce', 'Eggs', 'Meat', 'Spices', 'Cheese'],
-        image: 'https://example.com/spaghetti-carbonara.jpg',
-      },
-    ],
-  },
-  {
-    date: dayjs().format('YYYY-MM-DD'),
-    meals: [
-      {
-        name: 'Indian Curry',
-        ingredients: [
-          'Indian',
-          'Rice',
-          'Spices',
-          'Meat',
-          'Cheese',
-          'Lentils',
-          'Onions',
-          'Tomatoes',
-        ],
-        allergies: ['Gluten', 'Dairy', 'Egg'],
-        image: 'https://example.com/spaghetti-carbonara.jpg',
-      },
-    ],
-  },
-  {
-    date: dayjs().add(1, 'days').format('YYYY-MM-DD'),
-    meals: [
-      {
-        name: 'Vegetarian Lasagna',
-        ingredients: ['Italian', 'Cheese', 'Tomatoes'],
-        image: 'https://example.com/spaghetti-carbonara.jpg',
-      },
-    ],
-  },
-  {
-    date: dayjs().add(2, 'days').format('YYYY-MM-DD'),
-    meals: [
-      {
-        name: 'Hamburger',
-        ingredients: ['Meat', 'Cheese', 'Buns', 'Salad', 'Onions', 'Tomatoes', 'Bacon'],
-        image: 'https://example.com/spaghetti-carbonara.jpg',
-      },
-    ],
-  },
-]
+const dates = ref<z.infer<typeof calendarMenusSchema>['results']>()
 
-const collapsed = ref(true);
+onMounted(async () => {
+  const weekPlan = await httpClient.post(
+    'v1/discussion/result',
+    {
+      sessionKey: '', // TODO: pass the session key here!
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${auth.token}`,
+      },
+    },
+  )
+
+  const data = calendarMenusSchema.parse(weekPlan.data)
+  dates.value = data.results
+})
+
+const collapsed = ref(true)
 const toggleCollapse = () => {
-  collapsed.value = !collapsed.value;
+  collapsed.value = !collapsed.value
+}
+
+function getImage(name: string) {
+  const url = new URL(API_IMAGE_GEN_URL)
+  url.searchParams.append('name', name)
+  return url.toString()
 }
 </script>
 
@@ -88,28 +67,24 @@ const toggleCollapse = () => {
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-10 mt-3">
       <div class="flex flex-col gap-2 row-2 md:row-1">
-        <div v-for="date in dates">
-          <h5 class="text-neutral-500 ps-5 mb-2">{{ dayjs(date.date).format('dddd') }}</h5>
+        <div v-for="(value, key) in dates">
+          <h5 class="text-neutral-500 ps-5 mb-2">{{ key }}</h5>
           <div
-            v-for="(meal, i) in date.meals"
-            class="bg-neutral-200 rounded-3xl p-2 flex flex-row items-center gap-2"
+            class="bg-neutral-200 rounded-3xl p-2 flex flex-row items-center gap-2 mb-4"
             :class="{
-              'mb-4': i !== date.meals.length - 1,
-              'bg-red-200 outline-4 outline-red-500 attention-pulse': dayjs(date.date).isSame(
-                dayjs(),
-                'date',
-              ),
+              'bg-red-200 outline-4 outline-red-500 attention-pulse':
+                dayjs().format('dddd') === key,
             }"
           >
             <div class="w-24 h-16 min-w-24 rounded-2xl">
-              <CustomImage :src="meal.image" />
+              <CustomImage :src="getImage(value.name)" />
             </div>
 
             <div class="flex flex-col">
-              <h5 class="font-bold">{{ meal.name }}</h5>
+              <h5 class="font-bold">{{ value.name }}</h5>
               <p class="text-xs text-neutral-500">
-                <span v-for="(ingredient, i) in meal.ingredients"
-                  >{{ ingredient }}<span v-if="i !== meal.ingredients.length - 1">, </span></span
+                <span v-for="(ingredient, i) in value.ingredients"
+                  >{{ ingredient }}<span v-if="i !== value.ingredients.length - 1">, </span></span
                 >
               </p>
             </div>
@@ -120,8 +95,16 @@ const toggleCollapse = () => {
       <div class="bg-emerald-600 p-5 px-7 rounded-3xl mt-4">
         <div class="flex flex-row items-center gap-5 md:justify-center">
           <h2 class="text-white font-poetsen-one text-3xl">Shopping list</h2>
-          <i @click="toggleCollapse" v-if="collapsed" class="block md:hidden ti ti-chevron-down text-white text-3xl ms-auto cursor-pointer"></i>
-          <i @click="toggleCollapse" v-else-if="!collapsed" class="block md:hidden ti ti-chevron-up text-white text-3xl ms-auto cursor-pointer"></i>
+          <i
+            @click="toggleCollapse"
+            v-if="collapsed"
+            class="block md:hidden ti ti-chevron-down text-white text-3xl ms-auto cursor-pointer"
+          ></i>
+          <i
+            @click="toggleCollapse"
+            v-else-if="!collapsed"
+            class="block md:hidden ti ti-chevron-up text-white text-3xl ms-auto cursor-pointer"
+          ></i>
         </div>
 
         <div :class="{ 'hidden md:block': collapsed }">
