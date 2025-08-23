@@ -15,14 +15,21 @@ logger = logging.getLogger(__name__)
 
 class PeopleManager:
 
+    swiss_context: str = """
+All generated people MUST be Swiss nationals AND residents of Switzerland.
+Residences MUST be Swiss cities/towns only (e.g., Zürich, Bern, Basel, Lausanne, Geneva, Lugano, St. Gallen, Lucerne, Winterthur, Biel/Bienne, Thun, Köniz, Chur, Schaffhausen, Fribourg, Neuchâtel).
+Use realistic Swiss naming conventions (e.g., Meier, Müller, Keller, Frei, Baumann, Huber, Steiner, Schmid, Hofmann, Aebi, Wyss; given names like Luca, Jonas, Matteo, Leon, Noah, Lia, Emma, Mia, Lena, Sofia). 
+Dialect/register can vary by region but keep it natural.
+    """
+
     family_context: str = """
 HomeBite is a typical Swiss family household where meals bring everyone together.
 Each family member has their own busy life with work, school, and hobbies, yet they all gather around the table to share food and ideas.
 Their conversations reflect the diversity of modern Swiss life: some focus on health, others on tradition, some on saving time, and others on experimenting with new flavors.
 The family has a reputation for balancing everyday routines with a sense of curiosity, turning ordinary dinners into lively discussions about taste, culture, and practicality.
-Every member of the family lives in Switzerland—whether in Zürich, Basel, Geneva, Bern, Lugano, or a smaller town—bringing regional habits, dialects, and traditions into their shared meals.
+Every member of the family is and must always be Swiss, both by nationality and by residence. They all live in Switzerland—always in a Swiss city or town such as Zürich, Basel, Geneva, Bern, Lugano, Lausanne, St. Gallen, Lucerne, or another authentic Swiss location—bringing regional habits, dialects, and traditions into their shared meals.
 Family members say HomeBite is the “kitchen compass” that best translates their different jobs, personalities, and cravings into meals everyone can enjoy.
-"""
+    """
 
     agent_context: str = """
 HomeBite Experts are a diverse circle of Swiss specialists who each bring deep knowledge in their respective fields.
@@ -30,17 +37,17 @@ They are passionate about their expertise and see themselves as guardians of qua
 Although they are approachable and friendly in tone, they do not hesitate to enforce standards, correct misconceptions, or insist on discipline when their topic requires it.
 Their role is not only to advise but also to challenge—pushing others to respect the importance of their domain while remaining open to questions and mistakes.
 They strive for clarity, balance, and precision, yet are forgiving when someone learns or grows through their guidance.
-Each Expert lives in a different Swiss city—whether Zürich, Basel, Lugano, Lausanne, or a smaller town—adding a unique regional flavor to their perspective.
+Every Expert is and must always be Swiss, both by nationality and by residence. Each one lives in Switzerland—always in a Swiss city or town such as Zürich, Basel, Lugano, Lausanne, Geneva, Bern, or another authentic Swiss location—adding a unique regional flavor to their perspective.
 Together, the Experts form a collective voice of authority that keeps discussions grounded, practical, and reliably anchored in professional Swiss insight.
-"""
+    """
 
     person_role_template: str = """
-A {gender} person named {name} who likes {preferences}. Has {intolerances} food-intolerances. Has {short_term_goals} as short-term goals and {long_term_goals} as long-term goals.
-"""
+    A {gender} person named {name} who likes {preferences}. Has {intolerances} food-intolerances. Has {short_term_goals} as short-term goals and {long_term_goals} as long-term goals.
+    """
 
     agent_role_template: str = """
-A {gender} person named {name} with the following expertise: {expertise}.
-"""
+    A {gender} person named {name} with the following expertise: {expertise}.
+    """
 
     def __init__(self):
         pass
@@ -56,7 +63,10 @@ A {gender} person named {name} with the following expertise: {expertise}.
             long_term_goals=", ".join(long_term_goals)
         )
 
-        family_factory = TinyPersonFactory(self.family_context)
+        family_factory = TinyPersonFactory(
+            sampling_space_description=self.family_context,
+            context=self.swiss_context
+        )
 
         return family_factory.generate_person(person_spec)
 
@@ -68,5 +78,8 @@ A {gender} person named {name} with the following expertise: {expertise}.
             expertise=expertise
         )
 
-        agent_factory = TinyPersonFactory(self.agent_context)
+        agent_factory = TinyPersonFactory(
+            sampling_space_description=self.agent_context,
+            context=self.swiss_context
+        )
         return agent_factory.generate_person(agent_spec)
