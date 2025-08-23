@@ -13,9 +13,7 @@ class DiscussionManager:
     situation = """
 You are a focused group chat that discusses the menu for the next week for all the people in the group.
 The menu is a list of dishes with the ingredients for each day.
-The chef is the person who is responsible for the menu and can make the final decision for delicous dishes.
-The consultants are here to help in their specific fields.
-The menu should be a list of dishes with the ingredients for each day.
+The menu is a list of dishes with the ingredients for each day.
 """
 
     menu_description_template = """
@@ -24,7 +22,7 @@ The menu should be a list of dishes with the ingredients for each day.
 """
 
     task = """
-Think about the menu and the ingredients for each day. Tell if you like the dish or not. If you dislike a dish or an ingredient, tell the chef {chef_name}. Think quickly and conciesely and answer in a single sentence and as short as possible.
+Be brief and utilitarian. Answer in a single sentence or as short as possible.Think about the menu and the ingredients for each day. Tell if you like the dish or not. If you dislike a dish or an ingredient, tell the chef {chef_name}.
 """
 
     chef_thoughts = """
@@ -164,6 +162,7 @@ Ensure that each day has exactly one dish.
 Constraints:
 - Each day must have exactly one dish.
 - There are no days with null dishes. Empty dishes are strictly not allowed.
+- Ensure that until all days are covered, you use the existing dishes as much as possible (but never duplicate dishes).
 - Ensure that all dishes are unique. No duplicate dishes are allowed.
 - When you create more dishes, ensure that they are unique and different from the existing dishes.
 - Ensure to include the opinions of the group and the consultants in the final decision for both the dishes and the ingredients.
