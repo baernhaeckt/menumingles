@@ -1,13 +1,44 @@
 """FastAPI application entry point."""
 
 from dotenv import load_dotenv
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app.api.v1.router import api_router
 from app.config import settings
+from app.core.logging import log_exception_handler, logger
 
 load_dotenv()
+
+# ---- ultra-ugly hackathon patch: make llama_index.core.Document.text writable ----
+try:
+    from llama_index.core import Document  # llama-index-core >= 0.10
+except Exception:
+    from llama_index import Document  # some older versions expose it here
+
+# Only patch if it's a read-only property
+if isinstance(getattr(Document, "text", None), property) and Document.text.fset is None:
+    _getter = Document.text.fget
+
+    def _set_text(self, value):
+        """
+        Make .text 'settable' by recreating the underlying pydantic model
+        and copying fields back in-place. This avoids pydantic's __setattr__ guard.
+        """
+        try:
+            # pydantic v2 BaseModel has model_copy(update=...)
+            new_model = self.model_copy(update={"text": value})
+            # Replace fields in-place so existing references keep working
+            for k, v in new_model.__dict__.items():
+                object.__setattr__(self, k, v)
+        except Exception:
+            # Absolute last-ditch fallback: force-set a private attr
+            # (may be ignored by LlamaIndex versions, but keeps us running)
+            object.__setattr__(self, "_text", value)
+
+    Document.text = property(_getter, _set_text)
+# ---- end hack ----
 
 # Create FastAPI application
 app = FastAPI(
