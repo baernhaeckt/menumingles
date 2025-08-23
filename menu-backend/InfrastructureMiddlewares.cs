@@ -9,7 +9,10 @@ public static class InfrastructureMiddlewares
         app.UseSwaggerUI();
 
         // Enforece HTTPS
-        app.UseHttpsRedirection();
+        if (!app.Environment.IsDevelopment())
+        {
+            app.UseHttpsRedirection();
+        }
 
         // Add authentication and authorization
         app.UseAuthentication();
