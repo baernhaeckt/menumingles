@@ -40,8 +40,8 @@ interact('.item').draggable({
   inertia: {
     // lower resistance = longer glide
     resistance: 15,     // default ~20; try 5–15 for more momentum
-    minSpeed: 50,      // px/s needed to trigger inertia (raise to require a "flick")
-    endSpeed: 10,       // px/s where inertia stops
+    minSpeed: 20,      // px/s needed to trigger inertia (raise to require a "flick")
+    endSpeed: 4,       // px/s where inertia stops
     allowResume: true,  // let users grab the card again mid-inertia
   },
   listeners: {
