@@ -147,7 +147,7 @@ interact('.item').draggable({
           <div class="flex flex-col gap-8 h-full">
             <div class="grow relative flex items-center justify-center">
               <div
-                class="absolute w-5/7 -translate-x-14 -translate-y-22 md:-translate-x-16 md:-translate-y-16 bg-black md:w-1/2 aspect-video rounded-3xl overflow-hidden"
+                class="absolute w-5/7 -translate-x-14 -translate-y-22 md:-translate-x-48 md:-translate-y-32 bg-black md:w-1/2 aspect-video rounded-3xl overflow-hidden"
               >
                 <img
                   src="@/assets/placeholer-food/chiken.jpg"
@@ -156,7 +156,7 @@ interact('.item').draggable({
                 />
               </div>
               <div
-                class="absolute w-6/8 translate-x-12 translate-y-0 md:translate-x-22 bg-black md:w-1/2 aspect-video rounded-3xl overflow-hidden"
+                class="absolute w-6/8 translate-x-12 translate-y-0 md:translate-x-44 bg-black md:w-1/2 aspect-video rounded-3xl overflow-hidden"
               >
                 <img
                   src="@/assets/placeholer-food/noodles.jpg"
@@ -165,7 +165,7 @@ interact('.item').draggable({
                 />
               </div>
               <div
-                class="absolute w-5/7 -translate-x-7 translate-y-24 md:-translate-x-24 md:translate-y-22 bg-black md:w-1/2 aspect-video rounded-3xl overflow-hidden"
+                class="absolute w-5/7 -translate-x-7 translate-y-24 md:-translate-x-30 md:translate-y-32 bg-black md:w-1/2 aspect-video rounded-3xl overflow-hidden"
               >
                 <img
                   src="@/assets/placeholer-food/pot.jpg"
@@ -188,13 +188,13 @@ interact('.item').draggable({
   <div class="p-10 py-6 flex flex-row justify-between">
     <button
       @click="swipeByButton('left')"
-      class="bg-red-600 rounded-full aspect-square h-16 text-white flex items-center justify-center outline-4 outline-transparent outline-solid outline-offset-2 focus-visible:outline-red-200"
+      class="bg-red-600 hover:bg-red-700 cursor-pointer rounded-full aspect-square h-16 text-white flex items-center justify-center outline-4 outline-transparent outline-solid outline-offset-2 focus-visible:outline-red-200"
     >
       <i class="ti ti-x text-4xl"></i>
     </button>
     <button
       @click="swipeByButton('right')"
-      class="bg-green-600 rounded-full aspect-square h-16 text-white flex items-center justify-center outline-4 outline-transparent outline-solid outline-offset-2 focus-visible:outline-green-200"
+      class="bg-green-600 hover:bg-green-700 cursor-pointer rounded-full aspect-square h-16 text-white flex items-center justify-center outline-4 outline-transparent outline-solid outline-offset-2 focus-visible:outline-green-200"
     >
       <i class="ti ti-heart-filled text-4xl"></i>
     </button>
