@@ -8,15 +8,12 @@ import '@interactjs/dev-tools'
 import '@interactjs/inertia'
 import interact from '@interactjs/interact'
 import { computed, ref } from 'vue'
-import { useVibrate } from '@vueuse/core'
 
 function onSwipeLeft() {
-  vibrate();
   console.log('Swiped left')
 }
 
 function onSwipeRight() {
-  vibrate();
   console.log('Swiped right')
 }
 
@@ -27,8 +24,6 @@ const cards = ref([
 ])
 
 const topIndex = computed(() => cards.value.length - 1)
-
-const { vibrate } = useVibrate({ pattern: [100, 80, 50] });
 
 // Container ref to find the current top card element for programmatic swipes
 const deck = ref<HTMLElement | null>(null);
