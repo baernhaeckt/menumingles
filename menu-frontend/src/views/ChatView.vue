@@ -28,7 +28,7 @@ const connectionStatus = ref<'connecting' | 'connected' | 'disconnected' | 'erro
 const reconnectAttempts = ref(0);
 
 const websocketClient = getWebSocketClient({
-  serverAddress: 'ws://localhost:8765/ws',
+  serverAddress: 'wss://menu-mingles-minglers-brcebbdfb5cefdh8.northeurope-01.azurewebsites.net/api/v1/ws', // TODO: configure this somewhere?
   onMessageReceived: (message) => {
     console.log('Received message:', message.data.original);
 

@@ -38,7 +38,7 @@ export class WebSocketClient {
   private isManuallyDisconnected: boolean = false;
 
   constructor(options: WebSocketClientOptions = {}) {
-    this.serverAddress = options.serverAddress || 'ws://localhost:8765/ws';
+    this.serverAddress = options.serverAddress || 'ws://localhost:8000/api/v1/ws';
     this.onMessageReceived = options.onMessageReceived;
     this.onOpen = options.onOpen;
     this.onClose = options.onClose;
