@@ -40,7 +40,7 @@ public static class PlanningEndpoints
             string sessionKey = await planSessionStore.StartSessionAsync(user.GetHouseholdKey(), request.Ingredients, json);
 
             // We notify the users that the planning session has started (i.e., the fridge send a msg)
-            await menuMinglersClient.BroadcastMessageAsync(new BroadcastRequest("Fridge", "I'm running empty. Planning time!"));
+            await menuMinglersClient.BroadcastMessageAsync(new BroadcastRequest("fridge", "Fridge", "I'm running empty. Planning time!"));
 
             return Results.Ok(sessionKey);
         })

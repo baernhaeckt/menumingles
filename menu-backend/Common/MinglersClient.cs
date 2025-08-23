@@ -1,4 +1,6 @@
-﻿using System.Text.Json;
+﻿using Microsoft.Extensions.Primitives;
+
+using System.Text.Json;
 
 namespace backend.Common;
 
@@ -53,6 +55,7 @@ public sealed record DiscussionResponse(
 /// Root request for /api/v1/ws/broadcast
 /// </summary>
 public sealed record BroadcastRequest(
+    string Type,
     string Name,
     string Message
 );
