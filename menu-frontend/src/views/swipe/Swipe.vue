@@ -13,6 +13,7 @@ import { z } from 'zod'
 import { useAuthStore } from '@/stores/auth.ts'
 import { API_IMAGE_GEN_URL } from '@/constants.ts'
 import { useToast } from 'vue-toast-notification'
+import CustomImage from '@/components/CustomImage.vue'
 
 function onSwipeLeft() {
   const currentCard = getCurrentCard()
@@ -256,29 +257,17 @@ function getImage(name: string) {
               <div
                 class="absolute w-5/7 -translate-x-14 -translate-y-22 md:-translate-x-20 md:-translate-y-24 md:w-1/2 aspect-video rounded-3xl overflow-hidden"
               >
-                <img
-                  :src="getImage(card.names[0])"
-                  :alt="card.names[0]"
-                  class="w-full h-full object-cover"
-                />
+                <CustomImage :src="getImage(card.names[0])" />
               </div>
               <div
                 class="absolute w-6/8 translate-x-12 translate-y-0 md:translate-x-32 md:w-1/2 aspect-video rounded-3xl overflow-hidden"
               >
-                <img
-                  :src="getImage(card.names[1])"
-                  :alt="card.names[1]"
-                  class="w-full h-full object-cover"
-                />
+                <CustomImage :src="getImage(card.names[1])" />
               </div>
               <div
                 class="absolute w-5/7 -translate-x-7 translate-y-24 md:-translate-x-22 md:translate-y-18 md:w-1/2 aspect-video rounded-3xl overflow-hidden"
               >
-                <img
-                  :src="getImage(card.names[2])"
-                  :alt="card.names[2]"
-                  class="w-full h-full object-cover"
-                />
+                <CustomImage :src="getImage(card.names[2])" />
               </div>
             </div>
 
