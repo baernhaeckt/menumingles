@@ -370,6 +370,14 @@ const particleConfig = {
           Register
         </button>
       </div>
+
+      <div class="md:w-1/2! mx-auto mt-5">
+        <RouterLink to="/auth/login">
+          <div class="rounded-3xl p-5 bg-neutral-200 underline text-neutral-500">
+            Already have an account? Click here to login
+          </div>
+        </RouterLink>
+      </div>
     </form>
   </div>
 

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useHead } from '@unhead/vue'
 import { useAuthStore } from '@/stores/auth.ts'
+import { storeToRefs } from 'pinia'
 
 useHead({
   title: 'Home • Menu Mingles',
@@ -17,7 +18,9 @@ useHead({
   ],
 })
 
-const {isAuthenticated} = useAuthStore();
+
+const auth = useAuthStore()
+const { isAuthenticated } = storeToRefs(auth)
 </script>
 
 <template>
@@ -30,33 +33,7 @@ const {isAuthenticated} = useAuthStore();
       </button>
     </RouterLink>
 
-    <div class="grid grid-cols-2 gap-5">
-      <RouterLink to="/auth/login">
-        <button
-          class="rounded-2xl bg-red-600 px-6 py-4 text-white font-bold cursor-pointer text-center w-full"
-        >
-          Login
-        </button>
-      </RouterLink>
-
-      <RouterLink to="/auth/register">
-        <button
-          class="rounded-2xl bg-red-600 px-6 py-4 text-white font-bold cursor-pointer text-center w-full"
-        >
-          Register
-        </button>
-      </RouterLink>
-    </div>
-
-    <RouterLink v-if="isAuthenticated" to="/account/profile">
-      <button
-        class="rounded-2xl bg-red-600 px-6 py-4 text-white font-bold cursor-pointer text-center w-full"
-      >
-        Account Profile
-      </button>
-    </RouterLink>
-
-    <RouterLink to="/swipe">
+    <RouterLink v-if="isAuthenticated" to="/swipe">
       <button
         class="rounded-2xl bg-red-600 px-6 py-4 text-white font-bold cursor-pointer text-center w-full"
       >

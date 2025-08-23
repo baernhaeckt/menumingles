@@ -3,6 +3,9 @@ import { QrcodeSvg } from 'qrcode.vue'
 import { useToast } from 'vue-toast-notification'
 import { useHead } from '@unhead/vue'
 import { useAuthStore } from '@/stores/auth.ts'
+import { useRouter } from 'vue-router'
+
+const router = useRouter();
 
 const copyInviteLink = async () => {
   await navigator.clipboard.writeText(
@@ -24,11 +27,16 @@ useHead({
   link: [
     {
       rel: 'icon',
-    }
-  ]
-});
+    },
+  ],
+})
 
-const { user, getGravatarUrl } = useAuthStore();
+const { user, getGravatarUrl, logout } = useAuthStore()
+
+function logoutAndRedirect() {
+  logout();
+  router.push({ name: 'home' });
+}
 </script>
 
 <template>
@@ -45,6 +53,15 @@ const { user, getGravatarUrl } = useAuthStore();
         <h1 class="text-lg text-neutral-600">
           You're part of <span class="text-red-600">"WG Bern"</span>
         </h1>
+      </div>
+      <div class="ms-auto">
+        <button
+          @click="logoutAndRedirect"
+          class="rounded-2xl bg-red-600 hover:bg-red-700 px-6 py-4 text-white font-bold cursor-pointer flex flex-row gap-2 items-center"
+        >
+          <i class="ti ti-logout text-2xl"></i>
+          Logout
+        </button>
       </div>
     </div>
 

@@ -24,9 +24,9 @@ useHead({
       rel: 'icon',
     },
   ],
-});
+})
 
-const router = useRouter();
+const router = useRouter()
 
 const loginSchema = z.object({
   username: z.string().trim().min(1, 'Username is required'),
@@ -51,7 +51,7 @@ function validateForm(): boolean {
   return validate<RegisterForm>(loginSchema, form, fieldErrors)
 }
 
-const { loginWithToken } = useAuthStore();
+const { loginWithToken } = useAuthStore()
 
 async function onSubmit() {
   if (!validateForm()) return
@@ -62,14 +62,14 @@ async function onSubmit() {
       username: form.username.trim(),
       password: form.password,
     }
-    const toast = useToast();
+    const toast = useToast()
 
-    const response = await httpClient.post<string>('/v1/auth/login', payload);
-    loginWithToken(response.data);
-    toast.success('Logged in successfully');
-    await router.push({ name: 'home' });
+    const response = await httpClient.post<string>('/v1/auth/login', payload)
+    loginWithToken(response.data)
+    toast.success('Logged in successfully')
+    await router.push({ name: 'home' })
   } catch (error) {
-    apiError.value = getErrorMessage(error);
+    apiError.value = getErrorMessage(error)
   } finally {
     submitting.value = false
   }
@@ -135,6 +135,14 @@ async function onSubmit() {
           Login
           <IconLogin2 size="1.2rem" />
         </button>
+      </div>
+
+      <div class="md:w-1/2! mx-auto mt-5">
+        <RouterLink to="/auth/register">
+          <div class="rounded-3xl p-5 bg-neutral-200 underline text-neutral-500">
+            Don't have an account yet? No problem, click here to register an account or join an existing household.
+          </div>
+        </RouterLink>
       </div>
     </form>
   </div>
