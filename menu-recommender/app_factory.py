@@ -27,7 +27,7 @@ async def lifespan(app: FastAPI):
     # Load the recipe dataset
     recipies = joblib.load("./dataset/recipes_for_app.pkl")
 
-    model = RecipeEmbeddingModel(vocab_size=len(ingredient2idx), embedding_dim=64).to(device)
+    model = RecipeEmbeddingModel(vocab_size=len(ingredient2idx), embedding_dim=128).to(device)
     model.load_state_dict(torch.load("./models/recipe_embedding_model.pt", map_location=device))
     app.state.recommender_service = RecommenderService(
         model=model,

@@ -11,7 +11,7 @@ class RecommenderService:
         self.recipe_dataset = recipe_dataset
 
     def _calculate_top_k_recipes(self, query_recipe_ingredients: list, top_k: int) -> list:
-        query_embedding = self.model([query_recipe_ingredients])
+        query_embedding, _ = self.model([query_recipe_ingredients])
 
         # Calculate the topk
         similarity = F.cosine_similarity(query_embedding, self.recipe_embeddings)
