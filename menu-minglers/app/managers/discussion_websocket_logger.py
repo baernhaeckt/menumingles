@@ -7,6 +7,7 @@ from typing import Any, Dict, List
 from tinytroupe.environment import TinyWorld
 
 from app.core.logging import logger
+from app.models.chat_message_model import ChatMessage
 from app.services.websocket_service import WebSocketService
 
 
@@ -55,6 +56,10 @@ class DiscussionWebsocketLogger:
 
         self._polling_thread = None
         self._loop = None
+
+    def broadcast_message(self, message: ChatMessage) -> None:
+        """Broadcast a message to the websocket."""
+        self.websocket_service.broadcast_message(json.dumps(message))
 
     # ---------- threading / asyncio plumbing ----------
 
