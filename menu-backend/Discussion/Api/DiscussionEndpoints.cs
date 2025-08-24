@@ -41,23 +41,16 @@ public static class DiscussionEndpoints
                 .ToArray();
             JsonDocument menusToDiscuss = await recommenderClient.RecommendAsync(ingredientsOfMenus, 12);
 
-            // Conversation takes some time, so we do this in the background
-            // Fire and forget that, to return to the UI
-#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-            CancellationTokenSource cancellationTokenSource = new();
-            cancellationTokenSource.CancelAfter(TimeSpan.FromMinutes(5));
-            menuMinglersClient
-            .DiscussAsync(new DiscussionRequest(
+            // Conversation takes some time, so we do this in the background and let the UI poll
+            DiscussionTaskResponse? result = await menuMinglersClient.DiscussAsync(new DiscussionRequest(
                household.People,
                 household.Chef!,
                 household.Consultants!,
-                menusToDiscuss.RootElement.EnumerateArray().ToArray()), cancellationTokenSource.Token
-#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-            )
-            .ContinueWith(async response =>
-            {
-                await menuResultStore.SaveMenuResult(session.HouseholdKey, session.SessionKey, response.Result!.Results);
-            });
+                menusToDiscuss.RootElement.EnumerateArray().ToArray())
+            );
+
+            string taskId = result?.TaskId ?? throw new InvalidOperationException("TaskId required.");
+            await menuResultStore.SaveMenuResultInProgress(user.GetHouseholdKey(), request.SessionKey, taskId);
 
             return Results.NoContent();
         })
@@ -74,7 +67,17 @@ public static class DiscussionEndpoints
             ClaimsPrincipal user) =>
         {
             MenuResult menuResult = await menuResultStore.GetAsync(user.GetHouseholdKey(), request.SessionKey);
-            return Results.Ok(menuResult);
+            if (menuResult.Status == MenuResultStatus.Pending)
+            {
+                DiscussionStatusResponse? discussionStatusResponse = await menuMinglersClient.GetDiscussionStatusAsync(menuResult.TaskId);
+                if (discussionStatusResponse is not null && discussionStatusResponse.Result is not null)
+                {
+                    JsonElement result = discussionStatusResponse.Result.Value;
+                    await menuResultStore.SaveMenuResult(user.GetHouseholdKey(), request.SessionKey, result);
+                }
+            }
+
+            return Results.Ok(new DiscussionResultResponse(menuResult.Status, menuResult.Result));
         })
         .WithName("ResultDiscussion")
         .WithOpenApi()

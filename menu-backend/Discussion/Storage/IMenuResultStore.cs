@@ -4,7 +4,9 @@ namespace backend.Discussion.Storage;
 
 public interface IMenuResultStore
 {
-    Task SaveMenuResult(string householdKey, string sessionKey, JsonElement[] result);
+    Task SaveMenuResultInProgress(string householdKey, string sessionKey, string taskId);
+
+    Task SaveMenuResult(string householdKey, string sessionKey, JsonElement result);
 
     Task<MenuResult> GetAsync(string householdKey, string sessionKey);
 }

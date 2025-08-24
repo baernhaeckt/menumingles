@@ -9,9 +9,11 @@ public class MenuResultEntity : ITableEntity
 
     public string RowKey { get; set; }
 
-    public string Result { get; set; }
+    public string? Result { get; set; }
 
     public ETag ETag { get; set; }
 
     public DateTimeOffset? Timestamp { get; set; }
+
+    public string TaskId { get; set; }
 }
