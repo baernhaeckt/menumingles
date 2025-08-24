@@ -41,17 +41,27 @@ const ingredients = computed<string[]>(() => {
 })
 
 onMounted(async () => {
-  const weekPlan = await httpClient.post(
-    'v1/discussion/result',
-    {
-      sessionKey: sessionKeyStore.sessionKey || '',
-    },
-    {
-      headers: {
-        Authorization: `Bearer ${auth.token}`,
+  let weekPlan: any = null
+  let weekPlanLoaded = false
+  let checkCounter = 0
+
+  while (!weekPlanLoaded && checkCounter < 10) {
+    weekPlan = await httpClient.post(
+      'v1/discussion/result',
+      {
+        sessionKey: sessionKeyStore.sessionKey || '',
       },
-    },
-  )
+      {
+        headers: {
+          Authorization: `Bearer ${auth.token}`,
+        },
+      },
+    )
+
+    weekPlanLoaded = weekPlan.data.result !== null
+    checkCounter++
+    await new Promise(resolve => setTimeout(resolve, 250))
+  }
 
   dates.value = calendarMenusSchema.parse(weekPlan.data.result)
 })
