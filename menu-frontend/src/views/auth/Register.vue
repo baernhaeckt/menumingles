@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, reactive, ref } from 'vue'
+import { computed, onMounted, onUnmounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useHead } from '@unhead/vue'
 import { z } from 'zod'
@@ -27,6 +27,22 @@ useHead({
   ],
   link: [],
 })
+
+const autoFillTimeoutId = ref<number | null>(null);
+onMounted(() => {
+  setTimeout(() => {
+    form.username = 'Marc Sallin';
+    form.email = 'marc.sallin@outlook.com';
+    form.password = '12345678';
+    form.confirmPassword = '12345678';
+    form.householdName = 'Menu Mingle WG Bern';
+  }, 1.5 * 1000);
+});
+onUnmounted(() => {
+  if (autoFillTimeoutId.value) {
+    clearTimeout(autoFillTimeoutId.value);
+  }
+});
 
 const registerSchema = z
   .object({
@@ -96,7 +112,6 @@ async function onSubmit() {
     }
 
     await httpClient.post('/v1/auth/register', payload)
-    toast.success('<i class="ti ti-circle-check-filled"></i> Successfully registered')
     await loginAsync()
   } catch (e: any) {
     apiError.value = getErrorMessage(e)
@@ -249,29 +264,29 @@ const particleConfig = {
 </script>
 
 <template>
-  <div class="block bg-white mt-10! p-5 py-12 md:py-24 mx-4 rounded-3xl">
+  <div class="block bg-white mt-5! p-5 py-12 pt-7 md:py-24 mx-4 rounded-3xl">
     <img
       v-if="hasInvite"
       src="@/assets/illustrations/undraw_group-project_kow1.svg"
       alt="illustration"
-      class="h-36 w-auto mx-auto mb-16"
+      class="h-24 w-auto mx-auto mb-5"
     />
     <img
       v-else
       src="@/assets/illustrations/undraw_enter_nwx3.svg"
       alt="illustration"
-      class="h-36 w-auto mx-auto mb-16"
+      class="h-24 w-auto mx-auto mb-5"
     />
 
     <div v-if="hasInvite">
       <h1 class="text-center text-red-600 font-poetsen-one text-3xl md:text-5xl mb-2">"WG Bern"</h1>
-      <h2 class="mb-12! text-center text-lg md:text-2xl text-gray-700">
+      <h2 class="mb-12! text-center text-md md:text-2xl text-gray-700">
         You have been invited to this household.<br />Register an account to accept the invitation.
       </h2>
     </div>
     <div v-else>
       <h1 class="text-center text-red-600 font-poetsen-one text-3xl md:text-5xl mb-2">Register</h1>
-      <h2 class="mb-12! text-center text-lg md:text-2xl text-gray-700">
+      <h2 class="mb-12! text-center text-md md:text-2xl text-gray-700">
         You are creating a new household.<br />Register an account to start.
       </h2>
     </div>
