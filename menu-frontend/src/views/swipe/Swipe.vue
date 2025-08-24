@@ -258,28 +258,69 @@ function getImage(name: string) {
              :key="card.id"
              :class="{ item: i === topIndex, 'pointer-events-none -translate-y-1.5': i !== topIndex }"
              class="absolute w-full h-full px-6 pt-3 pb-6">
-          <div
-               class="h-full max-w-[500px] mx-auto bg-red bg-neutral-300 shadow-xl border border-neutral-400 border-solid rounded-3xl p-5">
-            <div class="flex flex-col gap-8 h-full">
-              <div class="grow relative flex items-center justify-center">
-                <div
-                     class="absolute w-5/7 -translate-x-14 -translate-y-22 md:-translate-x-20 md:-translate-y-24 md:w-1/2 aspect-video rounded-3xl overflow-hidden">
-                  <CustomImage :src="getImage(card.names[0])" />
+          <div class="h-full max-w-[500px] mx-auto bg-gradient-to-br from-white to-neutral-50 shadow-lg rounded-3xl p-6 overflow-hidden">
+            <div class="flex flex-col h-full">
+              <!-- Dish Images Section -->
+              <div class="grow relative flex items-center justify-center mb-6">
+                <!-- Background decorative elements -->
+                <div class="absolute inset-0 bg-gradient-to-br from-orange-50 to-yellow-50 rounded-2xl opacity-60"></div>
+
+                <!-- Dish 1 - Top left, slightly rotated -->
+                <div class="absolute top-12 left-12 w-32 h-32 md:top-16 md:left-16 md:w-40 md:h-40 transform -rotate-6 hover:rotate-0 transition-transform duration-300 z-20">
+                  <div class="relative w-full h-full">
+                    <div class="absolute inset-0 bg-white rounded-2xl shadow-lg border-2 border-white"></div>
+                    <div class="absolute inset-1 rounded-xl overflow-hidden">
+                      <CustomImage :src="getImage(card.names[0])" />
+                    </div>
+                    <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 bg-white px-3 py-1 rounded-full shadow-md border border-neutral-200 z-20">
+                      <span class="text-xs font-medium text-neutral-700 truncate max-w-20">{{ card.names[0] }}</span>
+                    </div>
+                  </div>
                 </div>
-                <div
-                     class="absolute w-6/8 translate-x-12 translate-y-0 md:translate-x-32 md:w-1/2 aspect-video rounded-3xl overflow-hidden">
-                  <CustomImage :src="getImage(card.names[1])" />
+
+                <!-- Dish 2 - Center, larger, no rotation -->
+                <div class="relative w-40 h-40 md:w-48 md:h-48 transform hover:scale-105 transition-transform duration-300 z-30">
+                  <div class="relative w-full h-full">
+                    <div class="absolute inset-0 bg-white rounded-2xl shadow-xl border-2 border-white"></div>
+                    <div class="absolute inset-1 rounded-xl overflow-hidden">
+                      <CustomImage :src="getImage(card.names[1])" />
+                    </div>
+                    <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 bg-white px-3 py-1 rounded-full shadow-md border border-neutral-200 z-30">
+                      <span class="text-xs font-medium text-neutral-700 truncate max-w-24">{{ card.names[1] }}</span>
+                    </div>
+                  </div>
                 </div>
-                <div
-                     class="absolute w-5/7 -translate-x-7 translate-y-24 md:-translate-x-22 md:translate-y-18 md:w-1/2 aspect-video rounded-3xl overflow-hidden">
-                  <CustomImage :src="getImage(card.names[2])" />
+
+                <!-- Dish 3 - Bottom right, slightly rotated -->
+                <div class="absolute bottom-12 right-12 w-32 h-32 md:bottom-16 md:right-16 md:w-40 md:h-40 transform rotate-6 hover:rotate-0 transition-transform duration-300 z-20">
+                  <div class="relative w-full h-full">
+                    <div class="absolute inset-0 bg-white rounded-2xl shadow-lg border-2 border-white"></div>
+                    <div class="absolute inset-1 rounded-xl overflow-hidden">
+                      <CustomImage :src="getImage(card.names[2])" />
+                    </div>
+                    <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 bg-white px-3 py-1 rounded-full shadow-md border border-neutral-200 z-20">
+                      <span class="text-xs font-medium text-neutral-700 truncate max-w-20">{{ card.names[2] }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Decorative food icons -->
+                <div class="absolute top-2 right-2 text-orange-400 opacity-30">
+                  <i class="ti ti-utensils text-2xl"></i>
+                </div>
+                <div class="absolute bottom-2 left-2 text-yellow-400 opacity-30">
+                  <i class="ti ti-chef-hat text-2xl"></i>
                 </div>
               </div>
 
-              <div>
-                <h5 class="text-3xl text-neutral-900 font-poetsen-one text-center">
+              <!-- Question Section -->
+              <div class="text-center">
+                <h5 class="text-2xl md:text-3xl text-neutral-800 font-poetsen-one mb-2">
                   Do you like this food?
                 </h5>
+                <p class="text-sm text-neutral-600">
+                  Swipe right to like, left to pass
+                </p>
               </div>
             </div>
           </div>
