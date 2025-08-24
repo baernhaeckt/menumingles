@@ -17,14 +17,14 @@ public class TableMenuResultStore : IMenuResultStore
 
     public async Task SaveMenuResultInProgress(string householdKey, string sessionKey, string taskId)
     {
-        await _table.AddEntityAsync(new MenuResultEntity
+        await _table.UpsertEntityAsync(new MenuResultEntity
         {
             PartitionKey = householdKey,
             RowKey = sessionKey,
             Result = null,
             TaskId = taskId,
             Timestamp = DateTimeOffset.UtcNow
-        });
+        }, TableUpdateMode.Replace);
     }
 
     public async Task SaveMenuResult(string householdKey, string sessionKey, JsonElement result)
