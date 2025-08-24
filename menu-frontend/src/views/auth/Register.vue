@@ -1,15 +1,18 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useHead } from '@unhead/vue'
 import { z } from 'zod'
 import { httpClient } from '@/client/http-client.ts'
 import { validate } from '@/forms/validation.ts'
 import { useToast } from 'vue-toast-notification'
-import router from '@/router'
 import { getErrorMessage } from '@/schemas/backend-error.ts'
+import { useAuthStore } from '@/stores/auth.ts'
 
 const route = useRoute()
+const router = useRouter()
+const { loginWithToken } = useAuthStore()
+const toast = useToast()
 const hasInvite = computed(() => !!route.query.householdInviteCode)
 
 useHead({
@@ -29,9 +32,7 @@ const registerSchema = z
   .object({
     username: z.string().trim().min(1, 'Username is required'),
     email: z.email().trim().min(1, 'Email is required'),
-    password: z
-      .string()
-      .min(1, 'Password is required'),
+    password: z.string().min(1, 'Password is required'),
     confirmPassword: z.string(),
     householdName: z.string(),
   })
@@ -60,8 +61,8 @@ const fieldErrors = ref<{
   email?: string
   password?: string
   confirmPassword?: string
-  username?: string,
-  householdName?: string,
+  username?: string
+  householdName?: string
 }>({})
 const submitting = ref(false)
 
@@ -69,26 +70,36 @@ function validateForm(): boolean {
   return validate<RegisterForm>(registerSchema, form, fieldErrors)
 }
 
+async function loginAsync() {
+  const response = await httpClient.post<string>('/v1/auth/login', {
+    username: form.username.trim(),
+    password: form.password,
+  })
+  loginWithToken(response.data)
+  toast.success('<i class="ti ti-circle-check-filled"></i> Logged you in successfully')
+  await router.push({ name: 'onboarding' })
+}
+
 async function onSubmit() {
   if (!validateForm()) return
   submitting.value = true
   apiError.value = null
   try {
-    const toast = useToast()
-
     const payload: Record<string, unknown> = {
       email: form.email.trim(),
       username: form.username.trim(),
       password: form.password,
       household: !route.query.householdInviteCode ? form.householdName.trim() : null,
-      householdKey: route.query.householdInviteCode ? (route.query.householdInviteCode as string) : null,
+      householdKey: route.query.householdInviteCode
+        ? (route.query.householdInviteCode as string)
+        : null,
     }
 
-    await httpClient.post('/v1/auth/register', payload);
-    toast.success('<i class="ti ti-circle-check-filled"></i> Successfully registered. Please login to continue.');
-    await router.push({ name: 'onboarding' })
+    await httpClient.post('/v1/auth/register', payload)
+    toast.success('<i class="ti ti-circle-check-filled"></i> Successfully registered')
+    await loginAsync()
   } catch (e: any) {
-    apiError.value = getErrorMessage(e);
+    apiError.value = getErrorMessage(e)
   } finally {
     submitting.value = false
   }
