@@ -71,7 +71,7 @@ async function continuePlanningAsync() {
  * from the swiping.
  * @see continuePlanning must be called first to retrieve the sessionKey and the menu selection.
  */
-async function selectMenuItemsAsync(request: { sessionKey: string; menuSelection: string[] }) {
+async function selectMenuItemsAsync(request: { sessionKey: string; matchedMenus: string[] }) {
   const response = await httpClient.post('v1/planning/selection', request, {
     headers: {
       Authorization: `Bearer ${auth.token}`,
@@ -104,7 +104,7 @@ async function startDiscussionAsync(request: { sessionKey: string }) {
 async function finishSwipingAsync() {
   await selectMenuItemsAsync({
     sessionKey: sessionKeyStore.sessionKey!,
-    menuSelection: menuDecisions.value
+    matchedMenus: menuDecisions.value
       .filter((decision) => decision.like)
       .map((selection) => selection.name)
       .flatMap((name) => name),
