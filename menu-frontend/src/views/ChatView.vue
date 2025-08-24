@@ -7,6 +7,7 @@ import { useHead } from '@unhead/vue';
 
 import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue';
 import { type ZodSafeParseResult } from "zod";
+import { httpClient } from '@/client/http-client.ts'
 
 type Avatar = {
   image: string;
@@ -265,6 +266,28 @@ const isOwnMessage = (message: ChatMessage) => {
 
   return isOwn;
 };
+
+async function manuallyTriggerFridge() {
+  const response = await httpClient.post(
+    'v1/planning/start',
+    {
+      ingredients: ['tomato'],
+    },
+    {
+      headers: {
+        'accept': 'application/json',
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${authStore.token}`,
+      },
+    },
+  );
+
+  if (response.status === 200) {
+    return;
+  }
+
+  alert('Failed to trigger fridge. Please try again.');
+}
 </script>
 
 <template>
@@ -312,7 +335,7 @@ const isOwnMessage = (message: ChatMessage) => {
       <!-- Empty State -->
       <div v-if="messages.length === 0" class="flex items-center justify-center h-full">
         <div class="text-center">
-          <div class="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div @click="manuallyTriggerFridge" class="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center mx-auto mb-4">
             <IconFridge class="w-8 h-8 text-slate-400" />
           </div>
           <h3 class="text-lg font-medium text-slate-700 mb-2">No messages yet</h3>
