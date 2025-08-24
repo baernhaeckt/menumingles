@@ -10,7 +10,7 @@ public static class AuthEndpoints
 {
     public static void RegisterAuthEndpoints(this IEndpointRouteBuilder routes)
     {
-        var auth = routes.MapGroup("/api/v1/auth");
+        RouteGroupBuilder auth = routes.MapGroup("/api/v1/auth");
 
         // Login endpoint
         auth.MapPost("/login", async (

@@ -4,7 +4,7 @@ namespace backend.Planning.Api;
 
 public class ContinueResponse
 {
-    public string SessionKey { get; set; }
+    public required string SessionKey { get; set; }
 
-    public JsonDocument MenuSelection { get; set; }
+    public required JsonDocument MenuSelection { get; set; }
 }

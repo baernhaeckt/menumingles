@@ -19,10 +19,10 @@ public class HealthEndpointTests
     public async Task HealthEndpoint_ShouldReturn204NoContent()
     {
         // Arrange
-        var client = _factory.CreateClient();
+        HttpClient client = _factory.CreateClient();
 
         // Act
-        var response = await client.GetAsync("/health");
+        HttpResponseMessage response = await client.GetAsync("/health");
 
         // Assert
         Assert.AreEqual(HttpStatusCode.NoContent, response.StatusCode);

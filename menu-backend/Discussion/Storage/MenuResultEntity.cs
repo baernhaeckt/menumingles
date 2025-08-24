@@ -5,9 +5,9 @@ namespace backend.Discussion.Storage;
 
 public class MenuResultEntity : ITableEntity
 {
-    public string PartitionKey { get; set; }
+    public required string PartitionKey { get; set; }
 
-    public string RowKey { get; set; }
+    public required string RowKey { get; set; }
 
     public string? Result { get; set; }
 
@@ -15,5 +15,5 @@ public class MenuResultEntity : ITableEntity
 
     public DateTimeOffset? Timestamp { get; set; }
 
-    public string TaskId { get; set; }
+    public string? TaskId { get; set; }
 }

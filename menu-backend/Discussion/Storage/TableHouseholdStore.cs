@@ -16,7 +16,7 @@ public class TableHouseholdStore : IHouseholdStore
 
     public async Task CreateIfNotExistsAsync(string household, string householdKey)
     {
-        var entity = await _table.GetEntityIfExistsAsync<HouseholdEntity>("HOUSEHOLD", householdKey, ["RowKey"]);
+        Azure.NullableResponse<HouseholdEntity> entity = await _table.GetEntityIfExistsAsync<HouseholdEntity>("HOUSEHOLD", householdKey, ["RowKey"]);
         if (entity.HasValue)
         {
             return;

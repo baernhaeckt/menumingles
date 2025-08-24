@@ -18,19 +18,19 @@ public sealed class TableUserStore : IUserStore
 
     public async Task<User?> FindByUsernameAsync(string username)
     {
-        var entity = await _table.GetEntityIfExistsAsync<UserEntity>("USER", username);
+        Azure.NullableResponse<UserEntity> entity = await _table.GetEntityIfExistsAsync<UserEntity>("USER", username);
         if (entity.HasValue is false)
         {
             return null;
         }
 
-        UserEntity? value = entity.Value;
+        UserEntity value = entity.Value!;
         return new User(value.RowKey, value.Email, value.Household, value.HouseholdKey);
     }
 
     public async Task<User?> VerifyPassword(string username, string password)
     {
-        var entity = await _table.GetEntityIfExistsAsync<UserEntity>("USER", username);
+        Azure.NullableResponse<UserEntity> entity = await _table.GetEntityIfExistsAsync<UserEntity>("USER", username);
         if (!entity.HasValue)
         {
             return null;

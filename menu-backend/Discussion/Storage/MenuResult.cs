@@ -8,5 +8,5 @@ public class MenuResult
 
     public JsonDocument? Result { get; set; }
 
-    public string TaskId { get; internal set; }
+    public required string TaskId { get; set; }
 }

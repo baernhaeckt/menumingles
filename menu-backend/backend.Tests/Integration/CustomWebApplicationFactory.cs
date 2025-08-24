@@ -14,7 +14,7 @@ public class CustomWebApplicationFactory<TProgram>
     {
         builder.ConfigureServices(services =>
         {
-            var userStoreRegistration = services.SingleOrDefault(
+            ServiceDescriptor userStoreRegistration = services.First(
                 d => d.ServiceType ==
                     typeof(IUserStore));
 
@@ -22,7 +22,7 @@ public class CustomWebApplicationFactory<TProgram>
 
             services.AddSingleton<IUserStore, InMemoryUserStore>();
 
-            var householdStoreRegistration = services.SingleOrDefault(
+            ServiceDescriptor householdStoreRegistration = services.First(
                 d => d.ServiceType ==
                     typeof(IHouseholdStore));
 

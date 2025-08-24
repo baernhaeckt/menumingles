@@ -15,39 +15,39 @@ public class RecommenderClient
     /// <summary>
     /// GET /api/v1/health/ – Health check
     /// </summary>
-    public async Task<JsonDocument?> GetHealthAsync(CancellationToken ct = default)
+    public async Task<JsonDocument> GetHealthAsync(CancellationToken ct = default)
     {
-        var response = await _http.GetAsync("/api/v1/health/", ct);
+        HttpResponseMessage response = await _http.GetAsync("/api/v1/health/", ct);
         response.EnsureSuccessStatusCode();
-        return await response.Content.ReadFromJsonAsync<JsonDocument>(cancellationToken: ct);
+        return await response.Content.ReadFromJsonAsync<JsonDocument>(cancellationToken: ct) ?? throw new InvalidOperationException();
     }
 
     /// <summary>
     /// POST /api/v1/menu/recommender – Inventory Recommender
     /// </summary>
     /// <param name="ingredients">Array of ingredient strings</param>
-    public async Task<JsonDocument?> RecommendAsync(IEnumerable<string> ingredients, int amount, CancellationToken ct = default)
+    public async Task<JsonDocument> RecommendAsync(IEnumerable<string> ingredients, int amount, CancellationToken ct = default)
     {
-        var response = await _http.PostAsJsonAsync($"/api/v1/menu/recommender?top_k={amount}", ingredients, ct);
+        HttpResponseMessage response = await _http.PostAsJsonAsync($"/api/v1/menu/recommender?top_k={amount}", ingredients, ct);
 
         if (response.StatusCode == System.Net.HttpStatusCode.UnprocessableEntity)
         {
-            var error = await response.Content.ReadFromJsonAsync<HTTPValidationError>(cancellationToken: ct);
+            HTTPValidationError? error = await response.Content.ReadFromJsonAsync<HTTPValidationError>(cancellationToken: ct);
             throw new ValidationException(error);
         }
 
         response.EnsureSuccessStatusCode();
-        return await response.Content.ReadFromJsonAsync<JsonDocument>(cancellationToken: ct);
+        return await response.Content.ReadFromJsonAsync<JsonDocument>(cancellationToken: ct) ?? throw new InvalidOperationException();
     }
 
     /// <summary>
     /// GET /api/v1/menu/menusampler – Next Menu Sampler
     /// </summary>
-    public async Task<JsonDocument?> GetMenuSamplerAsync(int amount, CancellationToken ct = default)
+    public async Task<JsonDocument> GetMenuSamplerAsync(int amount, CancellationToken ct = default)
     {
-        var response = await _http.GetAsync($"/api/v1/menu/menusampler?top_k={amount}", ct);
+        HttpResponseMessage response = await _http.GetAsync($"/api/v1/menu/menusampler?top_k={amount}", ct);
         response.EnsureSuccessStatusCode();
-        return await response.Content.ReadFromJsonAsync<JsonDocument>(cancellationToken: ct);
+        return await response.Content.ReadFromJsonAsync<JsonDocument>(cancellationToken: ct) ?? throw new InvalidOperationException();
     }
 }
 

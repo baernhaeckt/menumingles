@@ -17,11 +17,11 @@ public class MenuMinglersClient
     /// <summary>POST /api/v1/discuss</summary>
     public async Task<DiscussionTaskResponse?> DiscussAsync(DiscussionRequest request, CancellationToken ct = default)
     {
-        var response = await _http.PostAsJsonAsync("/api/v1/discuss", request, ct);
+        HttpResponseMessage response = await _http.PostAsJsonAsync("/api/v1/discuss", request, ct);
 
         if (response.StatusCode == System.Net.HttpStatusCode.UnprocessableEntity)
         {
-            var error = await response.Content.ReadFromJsonAsync<HTTPValidationError>(cancellationToken: ct);
+            HTTPValidationError? error = await response.Content.ReadFromJsonAsync<HTTPValidationError>(cancellationToken: ct);
             throw new ValidationException(error);
         }
 
@@ -34,11 +34,11 @@ public class MenuMinglersClient
     /// </summary>
     public async Task<DiscussionStatusResponse?> GetDiscussionStatusAsync(string taskId, CancellationToken ct = default)
     {
-        var response = await _http.GetAsync($"/api/v1/discuss/{taskId}/status", ct);
+        HttpResponseMessage response = await _http.GetAsync($"/api/v1/discuss/{taskId}/status", ct);
 
         if (response.StatusCode == System.Net.HttpStatusCode.UnprocessableEntity)
         {
-            var error = await response.Content.ReadFromJsonAsync<HTTPValidationError>(cancellationToken: ct);
+            HTTPValidationError? error = await response.Content.ReadFromJsonAsync<HTTPValidationError>(cancellationToken: ct);
             throw new ValidationException(error);
         }
 
@@ -54,7 +54,7 @@ public class MenuMinglersClient
     /// <summary>POST /api/v1/discuss</summary>
     public async Task BroadcastMessageAsync(BroadcastRequest request, CancellationToken ct = default)
     {
-        var response = await _http.PostAsJsonAsync("/api/v1/ws/broadcast", request, ct);
+        HttpResponseMessage response = await _http.PostAsJsonAsync("/api/v1/ws/broadcast", request, ct);
         response.EnsureSuccessStatusCode();
     }
 }

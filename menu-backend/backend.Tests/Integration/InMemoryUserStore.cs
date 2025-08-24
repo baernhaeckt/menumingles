@@ -12,7 +12,7 @@ public class InMemoryUserStore : IUserStore
 
     public Task<User?> FindByUsernameAsync(string username)
     {
-        if (_users.TryGetValue(username, out var entry))
+        if (_users.TryGetValue(username, out (User User, string Password) entry))
             return Task.FromResult<User?>(entry.User);
 
         return Task.FromResult<User?>(null);
@@ -26,7 +26,7 @@ public class InMemoryUserStore : IUserStore
 
     public Task<User?> VerifyPassword(string username, string password)
     {
-        if (_users.TryGetValue(username, out var entry) && entry.Password == password)
+        if (_users.TryGetValue(username, out (User User, string Password) entry) && entry.Password == password)
             return Task.FromResult<User?>(entry.User);
 
         return Task.FromResult<User?>(null);

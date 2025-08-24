@@ -2,7 +2,7 @@
 
 public class SelectionRequest
 {
-    public string SessionKey { get; set; }
+    public required string SessionKey { get; set; }
 
-    public IEnumerable<string> MatchedMenus { get; set; }
+    public required IEnumerable<string> MatchedMenus { get; set; }
 }

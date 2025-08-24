@@ -12,7 +12,7 @@ public static class PlanningEndpoints
 {
     public static void RegisterPlanningEndpoints(this IEndpointRouteBuilder routes)
     {
-        var plan = routes.MapGroup("/api/v1/planning");
+        RouteGroupBuilder plan = routes.MapGroup("/api/v1/planning");
 
         // Start planning session endpoint
         plan.MapPost("/start", async (
@@ -24,15 +24,15 @@ public static class PlanningEndpoints
         {
             // We get from the ingredients we have from the fridge a recommendation for starting menus
             // Additionally, we get menu suggestions to sample the taste
-            Task<JsonDocument?> fridgeIngredients = recommenderClient.RecommendAsync(request.Ingredients, 3);
-            Task<JsonDocument?> menuSuggestions = recommenderClient.GetMenuSamplerAsync(12);
+            Task<JsonDocument> fridgeIngredients = recommenderClient.RecommendAsync(request.Ingredients, 3);
+            Task<JsonDocument> menuSuggestions = recommenderClient.GetMenuSamplerAsync(12);
             await Task.WhenAll(fridgeIngredients, menuSuggestions);
             JsonDocument fridgeMenus = await fridgeIngredients;
             JsonDocument suggestionMenus = await menuSuggestions;
 
-            var fridgeArray = (await fridgeIngredients)!.RootElement.EnumerateArray().Select(e => e.Clone());
-            var suggestionArray = (await menuSuggestions)!.RootElement.EnumerateArray().Select(e => e.Clone());
-            var combinedElements = fridgeArray.Concat(suggestionArray).ToArray();
+            IEnumerable<JsonElement> fridgeArray = (await fridgeIngredients)!.RootElement.EnumerateArray().Select(e => e.Clone());
+            IEnumerable<JsonElement> suggestionArray = (await menuSuggestions)!.RootElement.EnumerateArray().Select(e => e.Clone());
+            JsonElement[] combinedElements = fridgeArray.Concat(suggestionArray).ToArray();
             string json = JsonSerializer.Serialize(combinedElements);
 
             // We start a planning session with the user household key, the ingredients and the recommended menus

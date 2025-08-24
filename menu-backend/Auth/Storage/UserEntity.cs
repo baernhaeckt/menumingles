@@ -22,9 +22,7 @@ public sealed class UserEntity : ITableEntity
 
     public DateTimeOffset? Timestamp { get; set; }
 
-    public string PasswordSalt { get; set; }
+    public required string PasswordSalt { get; set; }
 
-    public string PasswordHash { get; set; }
-
-    public string Persona { get; set; }
+    public required string PasswordHash { get; set; }
 }

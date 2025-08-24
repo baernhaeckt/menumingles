@@ -18,11 +18,11 @@ public sealed class HouseholdEntity : ITableEntity
 
     public DateTimeOffset? Timestamp { get; set; }
 
-    public string People { get; set; }
+    public string People { get; set; } = string.Empty;
 
-    public string Chef { get; set; }
+    public string Chef { get; set; } = string.Empty;
 
-    public string Consultants { get; set; }
+    public string Consultants { get; set; } = string.Empty;
 
-    public string Name { get; internal set; }
+    public string Name { get; internal set; } = string.Empty;
 }

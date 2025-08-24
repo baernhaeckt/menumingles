@@ -12,7 +12,7 @@ public static class Registrar
         builder.Services.AddSingleton<IMenuResultStore, TableMenuResultStore>();
         builder.Services.AddSingleton(_ =>
         {
-            var conn = builder.Configuration.GetConnectionString("TableStorage");
+            string? conn = builder.Configuration.GetConnectionString("TableStorage");
             return new TableServiceClient(conn);
         });
     }

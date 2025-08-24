@@ -11,7 +11,7 @@ public static class Registrar
         builder.Services.AddSingleton<IPlanSessionStore, TablePlanSessionStore>();
         builder.Services.AddSingleton<TableServiceClient>(_ =>
         {
-            var conn = builder.Configuration.GetConnectionString("TableStorage");
+            string? conn = builder.Configuration.GetConnectionString("TableStorage");
             return new TableServiceClient(conn);
         });
     }

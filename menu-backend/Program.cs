@@ -6,7 +6,7 @@ using backend.Discussion.Api;
 using backend.Planning;
 using backend.Planning.Api;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // Register all services
 builder.RegisterInfrastructureServices();
@@ -16,7 +16,7 @@ builder.RegisterAuthServices();
 builder.RegisterPlanningServices();
 builder.RegisterHouseholdServices();
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
 // Register all middlewares
 app.RegisterMiddlewares();

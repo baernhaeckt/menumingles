@@ -17,14 +17,14 @@ public class JwtFactory : IJwtFactory
     public JwtFactory(IConfiguration configuration)
     {
         _configuration = configuration;
-        var jwtKey = _configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key not configured");
+        string jwtKey = _configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key not configured");
         _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
     }
 
     public string GenerateToken(User user)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
-        var claims = new[]
+        Claim[] claims = new[]
         {
             new Claim(ClaimTypes.NameIdentifier, user.Username),
             new Claim(ClaimTypes.Name, user.Username),
@@ -42,7 +42,7 @@ public class JwtFactory : IJwtFactory
             Audience = _configuration["Jwt:Audience"]
         };
 
-        var token = tokenHandler.CreateToken(tokenDescriptor);
+        SecurityToken token = tokenHandler.CreateToken(tokenDescriptor);
         return tokenHandler.WriteToken(token);
     }
 }

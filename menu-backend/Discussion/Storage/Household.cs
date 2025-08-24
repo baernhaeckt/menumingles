@@ -8,9 +8,9 @@ public class Household
 
     public string Name { get; set; } = string.Empty;
 
-    public JsonDocument People { get; set; }
+    public required JsonDocument People { get; set; }
 
-    public JsonDocument Chef { get; set; }
+    public required JsonDocument Chef { get; set; }
 
-    public JsonDocument Consultants { get; set; }
+    public required JsonDocument Consultants { get; set; }
 }

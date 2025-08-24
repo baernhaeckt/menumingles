@@ -4,11 +4,11 @@ namespace backend.Planning.Storage;
 
 public class Session
 {
-    public string SessionKey { get; set; }
+    public string SessionKey { get; set; } = string.Empty;
 
-    public string HouseholdKey { get; set; }
+    public string HouseholdKey { get; set; } = string.Empty;
 
-    public IEnumerable<string> MatchedMenus { get; set; }
+    public IEnumerable<string> MatchedMenus { get; set; } = Enumerable.Empty<string>();
 
-    public JsonDocument MenuSelection { get; set; }
+    public required JsonDocument MenuSelection { get; set; }
 }

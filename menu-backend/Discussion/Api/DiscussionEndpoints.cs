@@ -13,7 +13,7 @@ public static class DiscussionEndpoints
 {
     public static void RegisterDiscussionEndpoints(this IEndpointRouteBuilder routes)
     {
-        var discuss = routes.MapGroup("/api/v1/discussion");
+        RouteGroupBuilder discuss = routes.MapGroup("/api/v1/discussion");
 
         // Start discussion of mingles for the pre planned session
         discuss.MapPost("/start", async (
@@ -35,7 +35,7 @@ public static class DiscussionEndpoints
                 .EnumerateArray()
                 .Where(
                     x => session.MatchedMenus.Contains(x.GetProperty("name").GetString()))
-                .SelectMany(x => x.GetProperty("ingredients").GetString().Split(", "))
+                .SelectMany(x => x.GetProperty("ingredients").GetString()!.Split(", "))
                 .Where(x => x is not null)
                 .Distinct()
                 .ToArray();
@@ -46,7 +46,7 @@ public static class DiscussionEndpoints
                household.People,
                 household.Chef!,
                 household.Consultants!,
-                menusToDiscuss.RootElement.EnumerateArray().ToArray())
+                menusToDiscuss!.RootElement.EnumerateArray().ToArray())
             );
 
             string taskId = result?.TaskId ?? throw new InvalidOperationException("TaskId required.");
@@ -77,7 +77,7 @@ public static class DiscussionEndpoints
                 }
             }
 
-            return Results.Ok(new DiscussionResultResponse(menuResult.Status, menuResult.Result));
+            return Results.Ok(new DiscussionResultResponse(menuResult.Status, menuResult.Result!));
         })
         .WithName("ResultDiscussion")
         .WithOpenApi()
