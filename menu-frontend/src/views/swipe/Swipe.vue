@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { httpClient } from '@/client/http-client.ts'
+import { httpClient } from '@/client/http-client'
 import CustomImage from '@/components/CustomImage.vue'
 import ThanksSwiping from '@/components/ThanksSwiping.vue'
-import { API_IMAGE_GEN_URL } from '@/constants.ts'
-import { useAuthStore } from '@/stores/auth.ts'
+import { API_IMAGE_GEN_URL } from '@/constants'
+import { useAuthStore } from '@/stores/auth'
+import { useSessionKeyStore } from '@/stores/sessionKey'
 import '@interactjs/actions/drag'
 import '@interactjs/actions/drop'
 import '@interactjs/actions/resize'
@@ -39,6 +40,7 @@ function getCurrentCard() {
 }
 
 const auth = useAuthStore();
+const sessionKeyStore = useSessionKeyStore();
 const toast = useToast();
 
 /**
@@ -101,7 +103,7 @@ async function startDiscussionAsync(request: { sessionKey: string }) {
 
 async function finishSwipingAsync() {
   await selectMenuItemsAsync({
-    sessionKey: sessionKey.value!,
+    sessionKey: sessionKeyStore.sessionKey!,
     menuSelection: menuDecisions.value
       .filter((decision) => decision.like)
       .map((selection) => selection.name)
@@ -109,18 +111,19 @@ async function finishSwipingAsync() {
   });
 
   await startDiscussionAsync({
-    sessionKey: sessionKey.value!
+    sessionKey: sessionKeyStore.sessionKey!
   })
 
   swipingFinished.value = true;
   toast.success('<i class="ti ti-circle-check-filled"></i> Thank you for swiping');
 }
 
-const sessionKey = ref<string | null>(null)
-
 onMounted(async () => {
+  // Initialize session key store from localStorage
+  sessionKeyStore.initFromStorage()
+
   const result = await continuePlanningAsync()
-  sessionKey.value = result.sessionKey
+  sessionKeyStore.setSessionKey(result.sessionKey)
 
   if (result.menuSelection.length % 3 !== 0) {
     throw new Error(

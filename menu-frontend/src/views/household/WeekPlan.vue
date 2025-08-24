@@ -1,16 +1,18 @@
 <script setup lang="ts">
-import { useHead } from '@unhead/vue'
-import ShoppingList from '@/components/ShoppingList.vue'
+import { httpClient } from '@/client/http-client'
 import CustomImage from '@/components/CustomImage.vue'
-import { onMounted, ref } from 'vue'
-import { httpClient } from '@/client/http-client.ts'
-import { useAuthStore } from '@/stores/auth.ts'
-import { z } from 'zod'
-import { calendarMenusSchema } from '@/schemas/calendar-menus.ts'
-import { API_IMAGE_GEN_URL } from '@/constants.ts'
+import ShoppingList from '@/components/ShoppingList.vue'
+import { API_IMAGE_GEN_URL } from '@/constants'
+import { calendarMenusSchema } from '@/schemas/calendar-menus'
+import { useAuthStore } from '@/stores/auth'
+import { useSessionKeyStore } from '@/stores/sessionKey'
+import { useHead } from '@unhead/vue'
 import dayjs from 'dayjs'
+import { onMounted, ref } from 'vue'
+import { z } from 'zod'
 
 const auth = useAuthStore()
+const sessionKeyStore = useSessionKeyStore()
 
 useHead({
   title: 'Week • Menu Mingles',
@@ -33,7 +35,7 @@ onMounted(async () => {
   const weekPlan = await httpClient.post(
     'v1/discussion/result',
     {
-      sessionKey: '', // TODO: pass the session key here!
+      sessionKey: sessionKeyStore.sessionKey || '',
     },
     {
       headers: {
@@ -70,12 +72,11 @@ function getImage(name: string) {
         <div v-for="(value, key) in dates">
           <h5 class="text-neutral-500 ps-5 mb-2">{{ key }}</h5>
           <div
-            class="bg-neutral-200 rounded-3xl p-2 flex flex-row items-center gap-2 mb-4"
-            :class="{
-              'bg-red-200 outline-4 outline-red-500 attention-pulse':
-                dayjs().format('dddd') === key,
-            }"
-          >
+               class="bg-neutral-200 rounded-3xl p-2 flex flex-row items-center gap-2 mb-4"
+               :class="{
+                'bg-red-200 outline-4 outline-red-500 attention-pulse':
+                  dayjs().format('dddd') === key,
+              }">
             <div class="w-24 h-16 min-w-24 rounded-2xl">
               <CustomImage :src="getImage(value.name)" />
             </div>
@@ -83,9 +84,7 @@ function getImage(name: string) {
             <div class="flex flex-col">
               <h5 class="font-bold">{{ value.name }}</h5>
               <p class="text-xs text-neutral-500">
-                <span v-for="(ingredient, i) in value.ingredients"
-                  >{{ ingredient }}<span v-if="i !== value.ingredients.length - 1">, </span></span
-                >
+                <span v-for="(ingredient, i) in value.ingredients">{{ ingredient }}<span v-if="i !== value.ingredients.length - 1">, </span></span>
               </p>
             </div>
           </div>
@@ -96,15 +95,13 @@ function getImage(name: string) {
         <div class="flex flex-row items-center gap-5 md:justify-center">
           <h2 class="text-white font-poetsen-one text-3xl">Shopping list</h2>
           <i
-            @click="toggleCollapse"
-            v-if="collapsed"
-            class="block md:hidden ti ti-chevron-down text-white text-3xl ms-auto cursor-pointer"
-          ></i>
+             @click="toggleCollapse"
+             v-if="collapsed"
+             class="block md:hidden ti ti-chevron-down text-white text-3xl ms-auto cursor-pointer"></i>
           <i
-            @click="toggleCollapse"
-            v-else-if="!collapsed"
-            class="block md:hidden ti ti-chevron-up text-white text-3xl ms-auto cursor-pointer"
-          ></i>
+             @click="toggleCollapse"
+             v-else-if="!collapsed"
+             class="block md:hidden ti ti-chevron-up text-white text-3xl ms-auto cursor-pointer"></i>
         </div>
 
         <div :class="{ 'hidden md:block': collapsed }">
@@ -124,9 +121,12 @@ function getImage(name: string) {
 .attention-pulse::after {
   content: '';
   position: absolute;
-  inset: -2px; /* start just outside */
-  border-radius: 1.5rem; /* match rounded-3xl */
-  border: 2px solid #ef4444; /* Tailwind red-500 */
+  inset: -2px;
+  /* start just outside */
+  border-radius: 1.5rem;
+  /* match rounded-3xl */
+  border: 2px solid #ef4444;
+  /* Tailwind red-500 */
   pointer-events: none;
   animation: attention-ring 1.5s ease-out infinite;
 }
@@ -136,10 +136,12 @@ function getImage(name: string) {
     opacity: 0.85;
     box-shadow: 0 0 0 0 rgba(239, 68, 68, 1);
   }
+
   60% {
     opacity: 0.2;
     box-shadow: 0 0 0 10px rgba(239, 68, 68, 0.5);
   }
+
   100% {
     opacity: 0;
     box-shadow: 0 0 0 14px rgba(239, 68, 68, 0);
