@@ -8,6 +8,12 @@ import { useHead } from '@unhead/vue';
 import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue';
 import { type ZodSafeParseResult } from "zod";
 
+type Avatar = {
+  image: string;
+  textColor: string;
+  backgroundColor: string;
+};
+
 useHead({
   title: 'Chat • Menu Mingles',
   meta: [
@@ -31,7 +37,7 @@ const reconnectAttempts = ref(0);
 const messagesContainer = ref<HTMLElement>();
 const planningMessageTimeout = ref<NodeJS.Timeout | null>(null);
 
-const availablePersonImages = {
+const availablePersonImages: Record<string, Avatar> = {
   'Fritz Baumann': {
     image: '/assets/chat-avatars/chef_fritz_baumann.webp',
     textColor: '#8B4513',
