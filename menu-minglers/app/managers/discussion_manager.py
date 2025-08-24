@@ -14,6 +14,7 @@ from tinytroupe.factory import TinyPersonFactory
 
 from app.core.logging import logger
 from app.managers.discussion_websocket_logger import DiscussionWebsocketLogger
+from app.models.chat_message_model import ChatMessage
 from app.services.websocket_service import WebSocketService
 
 
@@ -343,6 +344,16 @@ Rules:
             logger.log_info("Results extracted successfully", additional_context={
                 "result_keys": list(results.keys()) if isinstance(results, dict) else "No results"
             })
+
+            # Cleanup agents and environments
+            TinyPerson.clear_agents()
+            TinyWorld.clear_environments()
+
+            websocket_logger.broadcast_message(ChatMessage(
+                type="planning_finished",
+                name=chef["name"],
+                message="The menu for next week has been planned."
+            ))
 
             websocket_logger.end_logging()
 
