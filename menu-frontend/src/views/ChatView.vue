@@ -392,7 +392,7 @@ const isOwnMessage = (message: ChatMessage) => {
                   <p class="mb-2">{{ message.message }}</p>
                   <a href="/swipe"
                      class="rounded-2xl mb-2 bg-red-600 hover:bg-red-700 px-6 py-2 text-white font-bold cursor-pointer w-full flex flex-row justify-center items-center gap-2 outline-4 outline-transparent outline-solid outline-offset-2 focus-visible:outline-red-200">
-                    <i class="ti ti-arrow-right"></i> Start planning now
+                    <i class="ti ti-arrow-right"></i> Start planning
                   </a>
                 </template>
                 <template v-else-if="message.type === 'planning_finished'">
