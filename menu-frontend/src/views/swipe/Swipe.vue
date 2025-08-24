@@ -13,7 +13,7 @@ import '@interactjs/dev-tools'
 import '@interactjs/inertia'
 import interact from '@interactjs/interact'
 import '@interactjs/modifiers'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useToast } from 'vue-toast-notification'
 import { z } from 'zod'
 
@@ -148,7 +148,57 @@ const cards = ref<{ id: number; names: string[]; ingredients: string[] }[]>([])
 const swipingFinished = ref(false)
 const menuDecisions = ref<{ id: number; name: string[]; like: boolean }[]>([])
 
+// Progressive image loading: track which cards should load images
+const cardsToLoadImages = ref<Set<number>>(new Set())
+const progressiveLoadingTimer = ref<number | null>(null)
+
 const topIndex = computed(() => cards.value.length - 1)
+
+// Function to start progressive loading of cards
+function startProgressiveLoading() {
+  // Clear any existing timer
+  if (progressiveLoadingTimer.value) {
+    clearTimeout(progressiveLoadingTimer.value)
+  }
+
+  // Start progressive loading with delays
+  let currentIndex = topIndex.value
+  let delay = 0
+
+  // Load current card immediately
+  if (currentIndex >= 0) {
+    cardsToLoadImages.value.add(currentIndex)
+  }
+
+  // Progressively load cards below with increasing delays
+  // This ensures that if user stays on one card, all cards below will eventually load
+  for (let i = 1; i <= 5; i++) { // Load up to 5 cards ahead for better coverage
+    const cardIndex = currentIndex - i
+    if (cardIndex >= 0) {
+      delay += 300 // Reduced to 300ms for faster progressive loading
+      progressiveLoadingTimer.value = window.setTimeout(() => {
+        cardsToLoadImages.value.add(cardIndex)
+      }, delay)
+    }
+  }
+}
+
+// Watch for changes in topIndex and trigger progressive loading
+watch(topIndex, (newTopIndex) => {
+  startProgressiveLoading()
+}, { immediate: true })
+
+// Clean up timer when component unmounts
+onUnmounted(() => {
+  if (progressiveLoadingTimer.value) {
+    clearTimeout(progressiveLoadingTimer.value)
+  }
+})
+
+// Function to check if a card should load its images
+function shouldLoadImages(cardIndex: number): boolean {
+  return cardsToLoadImages.value.has(cardIndex)
+}
 
 // Container ref to find the current top card element for programmatic swipes
 const deck = ref<HTMLElement | null>(null)
@@ -294,7 +344,8 @@ function getImage(name: string) {
                   <div class="relative w-full h-full">
                     <div class="absolute inset-0 bg-white rounded-2xl shadow-lg border-2 border-white"></div>
                     <div class="absolute inset-1 rounded-xl overflow-hidden">
-                      <CustomImage :src="getImage(card.names[0])" />
+                      <CustomImage v-if="shouldLoadImages(i)" :src="getImage(card.names[0])" />
+                      <div v-else class="w-full h-full bg-neutral-200 skeleton" aria-hidden="true"></div>
                     </div>
                     <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 bg-white px-3 py-1 rounded-full shadow-md border border-neutral-200 z-20">
                       <span class="text-xs font-medium text-neutral-700 truncate max-w-20">{{ card.names[0] }}</span>
@@ -307,7 +358,8 @@ function getImage(name: string) {
                   <div class="relative w-full h-full">
                     <div class="absolute inset-0 bg-white rounded-2xl shadow-xl border-2 border-white"></div>
                     <div class="absolute inset-1 rounded-xl overflow-hidden">
-                      <CustomImage :src="getImage(card.names[1])" />
+                      <CustomImage v-if="shouldLoadImages(i)" :src="getImage(card.names[1])" />
+                      <div v-else class="w-full h-full bg-neutral-200 skeleton" aria-hidden="true"></div>
                     </div>
                     <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 bg-white px-3 py-1 rounded-full shadow-md border border-neutral-200 z-30">
                       <span class="text-xs font-medium text-neutral-700 truncate max-w-24">{{ card.names[1] }}</span>
@@ -320,7 +372,8 @@ function getImage(name: string) {
                   <div class="relative w-full h-full">
                     <div class="absolute inset-0 bg-white rounded-2xl shadow-lg border-2 border-white"></div>
                     <div class="absolute inset-1 rounded-xl overflow-hidden">
-                      <CustomImage :src="getImage(card.names[2])" />
+                      <CustomImage v-if="shouldLoadImages(i)" :src="getImage(card.names[2])" />
+                      <div v-else class="w-full h-full bg-neutral-200 skeleton" aria-hidden="true"></div>
                     </div>
                     <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 bg-white px-3 py-1 rounded-full shadow-md border border-neutral-200 z-20">
                       <span class="text-xs font-medium text-neutral-700 truncate max-w-20">{{ card.names[2] }}</span>
@@ -377,5 +430,26 @@ function getImage(name: string) {
 /* Prevent browser from hijacking touch gestures (scroll, back-swipe) */
 .item {
   touch-action: none;
+}
+
+/* Skeleton loading animation for progressive image loading */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+}
+
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 20%, rgba(255, 255, 255, .6) 40%, transparent 60%);
+  transform: translateX(-100%);
+  animation: shimmer 1.2s infinite;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
 }
 </style>
