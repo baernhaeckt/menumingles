@@ -82,6 +82,23 @@ async function selectMenuItemsAsync(request: { sessionKey: string; menuSelection
   throw new Error('Failed to continue planning')
 }
 
+/**
+ * Starts the discussion process for the week.
+ * @see continuePlanning must be called first to retrieve the sessionKey and the menu selection.
+ */
+async function startDiscussionAsync(request: { sessionKey: string }) {
+  const response = await httpClient.post('v1/discussion/start', request, {
+    headers: {
+      Authorization: `Bearer ${auth.token}`,
+    },
+  })
+  if (response.status === 204) {
+    return
+  }
+
+  throw new Error('Failed to start discussion')
+}
+
 async function finishSwipingAsync() {
   await selectMenuItemsAsync({
     sessionKey: sessionKey.value!,
@@ -90,6 +107,10 @@ async function finishSwipingAsync() {
       .map((selection) => selection.name)
       .flatMap((name) => name),
   });
+
+  await startDiscussionAsync({
+    sessionKey: sessionKey.value!
+  })
 
   swipingFinished.value = true;
   toast.success('<i class="ti ti-circle-check-filled"></i> Thank you for swiping');
