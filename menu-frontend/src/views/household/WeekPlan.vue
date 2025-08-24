@@ -8,7 +8,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useSessionKeyStore } from '@/stores/sessionKey'
 import { useHead } from '@unhead/vue'
 import dayjs from 'dayjs'
-import { computed, onMounted, ref } from "vue"
+import { computed, onMounted, ref } from 'vue'
 import { z } from 'zod'
 
 const auth = useAuthStore()
@@ -53,8 +53,7 @@ onMounted(async () => {
     },
   )
 
-  const data = calendarMenusSchema.parse(weekPlan.data.result)
-  dates.value = data
+  dates.value = calendarMenusSchema.parse(weekPlan.data.result)
 })
 
 const collapsed = ref(true)

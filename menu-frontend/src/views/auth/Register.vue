@@ -86,7 +86,7 @@ async function onSubmit() {
 
     await httpClient.post('/v1/auth/register', payload);
     toast.success('<i class="ti ti-circle-check-filled"></i> Successfully registered. Please login to continue.');
-    await router.push({ name: 'login' })
+    await router.push({ name: 'onboarding' })
   } catch (e: any) {
     apiError.value = getErrorMessage(e);
   } finally {

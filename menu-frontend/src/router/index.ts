@@ -39,6 +39,11 @@ const router = createRouter({
       name: 'menu-plan',
       component: () => import('../views/household/WeekPlan.vue'),
     },
+    {
+      path: '/account/onboarding',
+      name: 'onboarding',
+      component: () => import('../views/onboarding/Onboarding.vue')
+    }
   ],
 })
 
