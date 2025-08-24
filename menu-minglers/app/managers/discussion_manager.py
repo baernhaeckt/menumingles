@@ -247,8 +247,13 @@ Quickly extract the final weekly menu (one menu per day) as a SINGLE JSON object
             })
 
             # Combine all participants
-            persons.append(chef)
             persons.extend(consultants)
+
+            # Set MAX_EPISODE_LENGTH to 1 for persons and consultants, so that they don't chat too long
+            for p in persons:
+                p.MAX_EPISODE_LENGTH = 1
+
+            persons.append(chef)
             logger.log_info("All participants combined", additional_context={
                 "total_participants": len(persons)
             })
