@@ -1,6 +1,7 @@
 import asyncio
 import json
 import threading
+import time
 from typing import Any, Dict, List
 
 from tinytroupe.environment import TinyWorld
@@ -98,11 +99,21 @@ class DiscussionWebsocketLogger:
 
     async def _message_polling_loop(self) -> None:
         logger.log_info("Starting message polling loop")
+        last_thinking_message_timestamp = None
         try:
             while not self._stop_polling.is_set():
                 try:
                     # Copy buffer to avoid concurrent mutation surprises
                     messages: List[Dict[str, Any]] = list(self.world._displayed_communications_buffer)  # noqa: SLF001
+
+                    if last_thinking_message_timestamp is None or time.time() - last_thinking_message_timestamp > 2:
+                        payload = {
+                            "type": "planning",
+                            "name": "System",
+                            "message": "Planning in progress..."
+                        }
+                        await self.websocket_service.broadcast_message(json.dumps(payload))
+                        last_thinking_message_timestamp = time.time()
 
                     for message in messages:
                         if message is None:

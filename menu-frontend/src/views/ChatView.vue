@@ -29,6 +29,7 @@ const newMessage = ref('');
 const connectionStatus = ref<'connecting' | 'connected' | 'disconnected' | 'error'>('disconnected');
 const reconnectAttempts = ref(0);
 const messagesContainer = ref<HTMLElement>();
+const planningMessageTimeout = ref<NodeJS.Timeout | null>(null);
 
 // Ensure auth store is initialized
 authStore.initFromCookie();
@@ -50,7 +51,23 @@ const websocketClient = getWebSocketClient({
     if (parsedMessage.success) {
       // Enhance the message with the timestamp
       parsedMessage.data.timestamp = message.timestamp;
+
+      // Handle planning messages specially
+      if (parsedMessage.data.type === 'planning') {
+        handlePlanningMessage(parsedMessage.data);
+      } else {
+        // Add regular message, but ensure planning messages stay at the bottom
       messages.value.push(parsedMessage.data);
+
+        // If there's a planning message, move it back to the bottom
+        const planningMessages = messages.value.filter(msg => msg.type === 'planning');
+        const regularMessages = messages.value.filter(msg => msg.type !== 'planning');
+
+        if (planningMessages.length > 0) {
+          messages.value = [...regularMessages, ...planningMessages];
+        }
+      }
+
       // Auto-scroll to bottom when new message arrives
       nextTick(() => {
         scrollToBottom();
@@ -81,6 +98,27 @@ const scrollToBottom = () => {
   if (messagesContainer.value) {
     messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight;
   }
+};
+
+const handlePlanningMessage = (message: ChatMessage) => {
+  // Clear any existing planning message timeout
+  if (planningMessageTimeout.value) {
+    clearTimeout(planningMessageTimeout.value);
+    planningMessageTimeout.value = null;
+  }
+
+  // Remove any existing planning messages
+  messages.value = messages.value.filter(msg => msg.type !== 'planning');
+
+  // Add the new planning message at the end (bottom)
+  messages.value.push(message);
+
+  // Set timeout to remove this planning message after 5 seconds
+  planningMessageTimeout.value = setTimeout(() => {
+    // Remove all planning messages (there should only be one, but this is safer)
+    messages.value = messages.value.filter(msg => msg.type !== 'planning');
+    planningMessageTimeout.value = null;
+  }, 5000);
 };
 
 const checkReconnectionStatus = () => {
@@ -141,6 +179,9 @@ onMounted(async () => {
 onUnmounted(() => {
   if (statusInterval.value) {
     clearInterval(statusInterval.value);
+  }
+  if (planningMessageTimeout.value) {
+    clearTimeout(planningMessageTimeout.value);
   }
 });
 
@@ -237,7 +278,24 @@ const isOwnMessage = (message: ChatMessage) => {
       <!-- Messages -->
       <div
            v-for="(message, index) in messages"
-           :key="index"
+           :key="index">
+
+        <!-- Planning messages (typing indicator) -->
+        <div v-if="message.type === 'planning'" class="flex justify-start mb-4">
+          <div class="bg-slate-200 text-slate-600 px-3 py-2 rounded-2xl shadow-sm">
+            <div class="flex items-center gap-2">
+              <span class="text-sm">{{ message.message }}</span>
+              <div class="flex space-x-1">
+                <div class="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce" style="animation-delay: 0ms;"></div>
+                <div class="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce" style="animation-delay: 150ms;"></div>
+                <div class="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce" style="animation-delay: 300ms;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Regular messages -->
+        <div v-else
            :class="[
             'flex mb-4',
             isOwnMessage(message) ? 'justify-end' : 'justify-start'
@@ -312,6 +370,7 @@ const isOwnMessage = (message: ChatMessage) => {
           </div>
         </div>
       </div>
+    </div>
     </div>
 
     <!-- Message Input -->
