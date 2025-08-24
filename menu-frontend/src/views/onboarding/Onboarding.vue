@@ -34,13 +34,7 @@ const possibleAllergies = [
     name: 'Peanuts',
   },
   {
-    name: 'Soy',
-  },
-  {
-    name: 'Sesame',
-  },
-  {
-    name: 'Milk',
+    name: 'Lactose',
   },
 ]
 
@@ -60,29 +54,17 @@ const possibleLongTermGoals = [
     name: 'Eat more vegetables',
   },
   {
+    image: 'runner.jpg',
+    name: 'Prepare for a marathon',
+  },
+  {
     image: 'weight-loss.jpg',
     name: 'Lose weight',
   },
   {
-    image: 'sugar.jpg',
-    name: 'Reduce added sugar intake',
-  },
-  {
-    image: 'water.jpg',
-    name: 'Increase daily water consumption',
-  },
-  {
-    image: 'grains.jpg',
-    name: 'Incorporate more whole grains',
-  },
-  {
     image: 'processed-fast-food.jpg',
     name: 'Limit processed and fast foods',
-  },
-  {
-    image: 'healthy-food.jpg',
-    name: 'Eat balanced meals with protein, carbs, and healthy fats',
-  },
+  }
 ]
 
 const checkedLongTermGoals = ref<(typeof possibleLongTermGoals)[number]['name'][]>([])
@@ -102,12 +84,8 @@ async function onSubmit() {
 </script>
 
 <template>
-  <div class="block bg-white mt-10! p-5 mx-4 rounded-3xl">
-    <h1 class="text-3xl md:text-5xl font-poetsen-one text-red-600 text-center mb-5">
-      Welcome to Menu Mingles!
-    </h1>
-
-    <h5 class="text-xl text-neutral-500 mt-4 mb-2">Your allergies</h5>
+  <div class="block bg-white mt-5! p-5 mx-4 rounded-3xl">
+    <h5 class="text-xl text-neutral-500 mb-2">Your allergies</h5>
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
       <div
         v-for="allergen in possibleAllergies"
@@ -126,7 +104,7 @@ async function onSubmit() {
       </div>
     </div>
 
-    <h5 class="text-xl text-neutral-500 mt-5 mb-2">Any long term goals?</h5>
+    <h5 class="text-xl text-neutral-500 mt-5 mb-2">Long term goals</h5>
 
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
       <div
@@ -135,11 +113,11 @@ async function onSubmit() {
         class="bg-neutral-200 rounded-3xl p-5 outline-4 outline-transparent cursor-pointer flex flex-col items-center justify-center gap-3 h-full"
         :class="{ 'outline-red-500! bg-red-200!': checkedLongTermGoals.includes(goal.name) }"
       >
-        <div class="w-7/8 aspect-square">
+        <div class="w-5/8 aspect-square">
           <CustomImage :src="`/assets/long-term-goals/${goal.image}`" />
         </div>
 
-        <span class="text-center font-bold">{{ goal.name }}</span>
+        <span class="text-center font-bold line-clamp-2 text-ellipsis">{{ goal.name }}</span>
       </div>
     </div>
 
