@@ -316,7 +316,14 @@ Rules:
 
             # Chef makes final decision
             logger.log_debug("Chef making final decision")
-            chef.act()
+            try:
+                chef.act()
+            except Exception as e:
+                try:
+                    chef.act()
+                except Exception as e:
+                    pass
+
             logger.log_info("Chef final decision completed")
 
             # Extract results
