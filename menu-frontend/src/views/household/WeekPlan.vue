@@ -30,16 +30,14 @@ useHead({
 })
 
 const dates = ref<z.infer<typeof calendarMenusSchema>>()
-const ingredients = computed(() => {
-  return [
-    ...dates.value?.monday.ingredients,
-    ...dates.value?.tuesday.ingredients,
-    ...dates.value?.wednesday.ingredients,
-    ...dates.value?.thursday.ingredients,
-    ...dates.value?.friday.ingredients,
-    ...dates.value?.saturday.ingredients,
-    ...dates.value?.sunday.ingredients,
-  ].filter((ingredient, index, self) => self.indexOf(ingredient) === index)
+const ingredients = computed<string[]>(() => {
+  const d = dates.value
+  if (!d) return []
+
+  const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as const
+
+  const all = days.flatMap(day => d[day]?.ingredients ?? [])
+  return Array.from(new Set(all))
 })
 
 onMounted(async () => {
