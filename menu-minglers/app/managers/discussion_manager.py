@@ -349,11 +349,11 @@ Rules:
             TinyPerson.clear_agents()
             TinyWorld.clear_environments()
 
-            websocket_logger.broadcast_message(ChatMessage(
-                type="planning_finished",
-                name=chef["name"],
-                message="The menu for next week has been planned."
-            ))
+            websocket_logger.broadcast_message({
+                "type": "planning_finished",
+                "name": chef["name"],
+                "message": "The menu for next week has been planned."
+            })
 
             websocket_logger.end_logging()
 
