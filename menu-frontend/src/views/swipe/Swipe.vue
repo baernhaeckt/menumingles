@@ -115,7 +115,6 @@ async function finishSwipingAsync() {
   })
 
   swipingFinished.value = true;
-  toast.success('<i class="ti ti-circle-check-filled"></i> Thank you for swiping');
 }
 
 onMounted(async () => {
