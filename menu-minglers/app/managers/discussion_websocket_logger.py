@@ -57,9 +57,9 @@ class DiscussionWebsocketLogger:
         self._polling_thread = None
         self._loop = None
 
-    def broadcast_message(self, message: Dict[str, Any]) -> None:
+    async def broadcast_message(self, message: Dict[str, Any]) -> None:
         """Broadcast a message to the websocket."""
-        self.websocket_service.broadcast_message(json.dumps(message))
+        await self.websocket_service.broadcast_message(json.dumps(message))
 
     # ---------- threading / asyncio plumbing ----------
 

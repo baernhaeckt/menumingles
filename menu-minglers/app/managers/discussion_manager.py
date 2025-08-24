@@ -87,8 +87,7 @@ class BackgroundDiscussionManager:
 
             # Start background thread
             thread = threading.Thread(
-                target=self._run_discussion_task,
-                args=(task_id,),
+                target=lambda: asyncio.run(self._run_discussion_task(task_id)),
                 daemon=True
             )
             thread.start()
@@ -99,7 +98,7 @@ class BackgroundDiscussionManager:
         """Get the status of a discussion task."""
         return self._tasks.get(task_id)
 
-    def _run_discussion_task(self, task_id: str):
+    async def _run_discussion_task(self, task_id: str):
         """Run the discussion task in a background thread."""
         task = self._tasks.get(task_id)
         if not task:
@@ -112,7 +111,7 @@ class BackgroundDiscussionManager:
 
             # Create discussion manager and run discussion
             discussion_manager = DiscussionManager()
-            result = discussion_manager.discuss_menus(
+            result = await discussion_manager.discuss_menus(
                 people=task.request_data["people"],
                 chef=task.request_data["chef"],
                 consultants=task.request_data["consultants"],
@@ -164,11 +163,11 @@ Be brief and utilitarian, concise and answer directly. Answer in one to three se
 """
 
     chef_thoughts = """
-I am the chef and I am responsible for the menu. I will make the final decision for delicous dishes. I am able to switch ingredients based on the wishes of the group and the suggestions of the consultants. I do not discuss about my personal like or dislike of the dishes and their ingredients, but only about my professional opinion about the ingredients.
+I am the chef and I am responsible for the menu. I will make the final decision for delicous dishes. I am able to switch ingredients based on the wishes of the group and the suggestions of the consultants. I do not discuss about my personal like or dislike of the dishes and their ingredients, but only about my professional opinion about the ingredients. Always give feedback about all dishes and ingredients in one message.
 """
 
     consultant_thoughts = """
-I am a consultant and I am here to help in my specific field. I am able to suggest ingredients based on the wishes of the group and the suggestions of the chef. I do not discuss about my personal like or dislike of the dishes and their ingredients, but only about my professional opinion about the ingredients.
+I am a consultant and I am here to help in my specific field. I am able to suggest ingredients based on the wishes of the group and the suggestions of the chef. I do not discuss about my personal like or dislike of the dishes and their ingredients, but only about my professional opinion about the ingredients. Always give feedback about all dishes and ingredients in one message.
 """
 
     extraction_objective = """
@@ -208,7 +207,7 @@ Quickly extract the final weekly menu (one menu per day) as a SINGLE JSON object
     def __init__(self):
         self.websocket_service = WebSocketService.get_instance()
 
-    def discuss_menus(self, people: list[dict], chef: dict, consultants: list[dict], menu: list[dict]) -> dict:
+    async def discuss_menus(self, people: list[dict], chef: dict, consultants: list[dict], menu: list[dict]) -> dict:
         """Start a menu discussion with the given participants and menu."""
         logger.log_info("Starting menu discussion", additional_context={
             "participants_count": len(people),
@@ -224,6 +223,9 @@ Quickly extract the final weekly menu (one menu per day) as a SINGLE JSON object
             logger.log_info("Chef loaded successfully", additional_context={
                 "chef_name": chef["name"]
             })
+
+            # Only pick max 2 people from the people list
+            people = people[:2] if len(people) > 2 else people
 
             # Load people specifications
             logger.log_debug("Loading people specifications")
@@ -349,7 +351,7 @@ Rules:
             TinyPerson.clear_agents()
             TinyWorld.clear_environments()
 
-            websocket_logger.broadcast_message({
+            await websocket_logger.broadcast_message({
                 "type": "planning_finished",
                 "name": chef["name"],
                 "message": "The menu for next week has been planned."
