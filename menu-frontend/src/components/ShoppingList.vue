@@ -1,7 +1,11 @@
 <script setup lang="ts">
-import CustomImage from '@/components/CustomImage.vue'
-import { API_IMAGE_GEN_URL } from '@/constants'
-import { ref } from 'vue'
+import CustomImage from '@/components/CustomImage.vue';
+import { API_IMAGE_GEN_URL } from '@/constants';
+import { ref } from 'vue';
+
+const props = defineProps<{
+  ingredients: string[]
+}>()
 
 const providers = [
   {
@@ -9,41 +13,6 @@ const providers = [
   },
   {
     id: 'coop',
-  },
-]
-
-const items = [
-  {
-    name: 'Milk',
-    image: 'https://placehold.co/600x400',
-  },
-  {
-    name: 'Bread',
-    image: 'https://placehold.co/600x400',
-  },
-  {
-    name: 'Eggs',
-    image: 'https://placehold.co/600x400',
-  },
-  {
-    name: 'Cheese',
-    image: 'https://placehold.co/600x400',
-  },
-  {
-    name: 'Butter',
-    image: 'https://placehold.co/600x400',
-  },
-  {
-    name: 'Flour',
-    image: 'https://placehold.co/600x400',
-  },
-  {
-    name: 'Sugar',
-    image: 'https://placehold.co/600x400',
-  },
-  {
-    name: 'Coffee',
-    image: 'https://placehold.co/600x400',
   },
 ]
 
@@ -80,11 +49,11 @@ function getImage(name: string) {
 
   <div class="rounded-4xl bg-neutral-100 w-full p-5">
     <div class="flex flex-col gap-2">
-      <div v-for="shoppingItem in items" class="flex flex-row items-center gap-5">
+      <div v-for="ingredient in props.ingredients.slice(0, 12)" class="flex flex-row items-center gap-5">
         <div class="w-24 h-14">
-          <CustomImage :src="getImage(shoppingItem.name)" />
+          <CustomImage :src="getImage(ingredient)" />
         </div>
-        <h5 class="text-neutral-800 font-bold">{{ shoppingItem.name }}</h5>
+        <h5 class="text-neutral-800 font-bold">{{ ingredient }}</h5>
       </div>
     </div>
   </div>

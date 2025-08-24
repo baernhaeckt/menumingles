@@ -8,7 +8,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useSessionKeyStore } from '@/stores/sessionKey'
 import { useHead } from '@unhead/vue'
 import dayjs from 'dayjs'
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from "vue"
 import { z } from 'zod'
 
 const auth = useAuthStore()
@@ -29,7 +29,18 @@ useHead({
   ],
 })
 
-const dates = ref<z.infer<typeof calendarMenusSchema>['results']>()
+const dates = ref<z.infer<typeof calendarMenusSchema>>()
+const ingredients = computed(() => {
+  return [
+    ...dates.value?.monday.ingredients,
+    ...dates.value?.tuesday.ingredients,
+    ...dates.value?.wednesday.ingredients,
+    ...dates.value?.thursday.ingredients,
+    ...dates.value?.friday.ingredients,
+    ...dates.value?.saturday.ingredients,
+    ...dates.value?.sunday.ingredients,
+  ].filter((ingredient, index, self) => self.indexOf(ingredient) === index)
+})
 
 onMounted(async () => {
   const weekPlan = await httpClient.post(
@@ -44,8 +55,8 @@ onMounted(async () => {
     },
   )
 
-  const data = calendarMenusSchema.parse(weekPlan.data)
-  dates.value = data.results
+  const data = calendarMenusSchema.parse(weekPlan.data.result)
+  dates.value = data
 })
 
 const collapsed = ref(true)
@@ -66,7 +77,6 @@ function getImage(name: string) {
       <i class="ti ti-calendar-week"></i>
       Menu Plan
     </h1>
-
     <div class="grid grid-cols-1 md:grid-cols-2 gap-10 mt-3">
       <div class="flex flex-col gap-2 row-2 md:row-1">
         <div v-for="(value, key) in dates">
@@ -105,7 +115,7 @@ function getImage(name: string) {
         </div>
 
         <div :class="{ 'hidden md:block': collapsed }">
-          <ShoppingList />
+          <ShoppingList :ingredients="ingredients" />
         </div>
       </div>
     </div>
