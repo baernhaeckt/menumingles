@@ -31,6 +31,44 @@ const reconnectAttempts = ref(0);
 const messagesContainer = ref<HTMLElement>();
 const planningMessageTimeout = ref<NodeJS.Timeout | null>(null);
 
+const availablePersonImages = {
+  'Fritz Baumann': {
+    image: '/assets/chat-avatars/chef_fritz_baumann.webp',
+    textColor: '#8B4513',
+    backgroundColor: '#FFE4C4'
+  },
+  'Susi Kräftig': {
+    image: '/assets/chat-avatars/coach_susi_kraeftig.webp',
+    textColor: '#FF6B35',
+    backgroundColor: '#FFF3E6'
+  },
+  'Christoph Meier': {
+    image: '/assets/chat-avatars/person_christoph_meier.webp',
+    textColor: '#2E86AB',
+    backgroundColor: '#E6F2FF'
+  },
+  'Tobias Müller': {
+    image: '/assets/chat-avatars/person_tobias_mueller.webp',
+    textColor: '#A23B72',
+    backgroundColor: '#FFF0F5'
+  },
+  'Mateo Álvarez': {
+    image: '/assets/chat-avatars/person_mateo_alvarez.webp',
+    textColor: '#F18F01',
+    backgroundColor: '#FFF8E1'
+  },
+  'Lea Huber': {
+    image: '/assets/chat-avatars/person_lea_huber.webp',
+    textColor: '#C73E1D',
+    backgroundColor: '#FFE4E1'
+  },
+  'Aisha Khan': {
+    image: '/assets/chat-avatars/person_aisha_khan.webp',
+    textColor: '#6B5B95',
+    backgroundColor: '#F5E6FF'
+  }
+}
+
 // Ensure auth store is initialized
 authStore.initFromCookie();
 
@@ -133,6 +171,7 @@ const sendMessage = () => {
     const messageData = {
       type: 'broadcast',
       data: {
+        type: 'chat',
       name: currentUser,
         message: newMessage.value.trim()
       }
@@ -316,6 +355,7 @@ const isOwnMessage = (message: ChatMessage) => {
             <IconFridge
                         v-if="message.name === 'Fridge'"
                         class="w-5 h-5 text-white" />
+              <img v-else-if="message.name in availablePersonImages" :src="availablePersonImages[message.name].image" class="rounded-full" />
             <IconUser
                       v-else
                       :class="isOwnMessage(message) ? 'text-white' : 'text-slate-600'"
@@ -327,7 +367,9 @@ const isOwnMessage = (message: ChatMessage) => {
             <!-- Name (only for received messages) -->
             <div
                  v-if="!isOwnMessage(message)"
-                 class="text-xs font-medium text-slate-600 mb-1 ml-1">
+                   class="text-xs font-bold mb-1 ml-1"
+                   :class="{ 'text-slate-600': !availablePersonImages[message.name] }"
+                   :style="{ color: availablePersonImages[message.name]?.textColor }">
               {{ message.name }}
             </div>
 
