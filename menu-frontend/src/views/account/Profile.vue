@@ -6,6 +6,7 @@ import { useAuthStore } from '@/stores/auth.ts'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { ref } from 'vue'
+import ProfileButtons from '@/components/ProfileButtons.vue'
 
 const router = useRouter()
 
@@ -26,11 +27,6 @@ useHead({
 
 const auth = useAuthStore()
 const { getGravatarUrl, householdKey, householdName, username } = storeToRefs(auth)
-
-function logoutAndRedirect() {
-  auth.logout()
-  router.push({ name: 'home' })
-}
 
 const inviteLink = ref(
   `https://menu-mingles-frontend-cccnfba0ezc2dhbc.northeurope-01.azurewebsites.net/auth/register?householdInviteCode=${householdKey.value}`,
@@ -59,23 +55,13 @@ const copyInviteLink = async () => {
           You're part of <span class="text-red-600">"{{ householdName }}"</span>
         </h1>
       </div>
-      <div class="ms-auto flex items-center gap-2 flex-row">
-        <RouterLink to="/household/week">
-          <button
-            class="rounded-2xl bg-red-600 hover:bg-red-700 px-6 py-4 text-white font-bold cursor-pointer flex flex-row gap-2 items-center"
-          >
-            <i class="ti ti-burger text-2xl"></i>
-            Menu Plan
-          </button>
-        </RouterLink>
-        <button
-          @click="logoutAndRedirect"
-          class="rounded-2xl bg-red-600 hover:bg-red-700 px-6 py-4 text-white font-bold cursor-pointer flex flex-row gap-2 items-center"
-        >
-          <i class="ti ti-logout text-2xl"></i>
-          Logout
-        </button>
+      <div class="hidden ms-auto md:flex items-center gap-2 flex-row">
+        <ProfileButtons></ProfileButtons>
       </div>
+    </div>
+
+    <div class="flex ms-auto md:hidden items-center gap-2 flex-row flex-wrap mb-5">
+      <ProfileButtons></ProfileButtons>
     </div>
 
     <div class="bg-neutral-200 rounded-2xl p-5 mb-5">

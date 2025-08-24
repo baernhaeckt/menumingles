@@ -340,7 +340,7 @@ function getImage(name: string) {
                 <div class="absolute inset-0 bg-gradient-to-br from-orange-50 to-yellow-50 rounded-2xl opacity-60"></div>
 
                 <!-- Dish 1 - Top left, slightly rotated -->
-                <div class="absolute top-12 left-12 w-32 h-32 md:top-16 md:left-16 md:w-40 md:h-40 transform -rotate-6 hover:rotate-0 transition-transform duration-300 z-20">
+                <div class="absolute select-none top-12 left-12 w-32 h-32 md:top-16 md:left-16 md:w-40 md:h-40 transform -rotate-6 hover:rotate-0 transition-transform duration-300 z-20">
                   <div class="relative w-full h-full">
                     <div class="absolute inset-0 bg-white rounded-2xl shadow-lg border-2 border-white"></div>
                     <div class="absolute inset-1 rounded-xl overflow-hidden">
@@ -354,7 +354,7 @@ function getImage(name: string) {
                 </div>
 
                 <!-- Dish 2 - Center, larger, no rotation -->
-                <div class="relative w-40 h-40 md:w-48 md:h-48 transform hover:scale-105 transition-transform duration-300 z-30">
+                <div class="relative select-none w-40 h-40 md:w-48 md:h-48 transform hover:scale-105 transition-transform duration-300 z-30">
                   <div class="relative w-full h-full">
                     <div class="absolute inset-0 bg-white rounded-2xl shadow-xl border-2 border-white"></div>
                     <div class="absolute inset-1 rounded-xl overflow-hidden">
@@ -368,7 +368,7 @@ function getImage(name: string) {
                 </div>
 
                 <!-- Dish 3 - Bottom right, slightly rotated -->
-                <div class="absolute bottom-12 right-12 w-32 h-32 md:bottom-16 md:right-16 md:w-40 md:h-40 transform rotate-6 hover:rotate-0 transition-transform duration-300 z-20">
+                <div class="absolute select-none bottom-12 right-12 w-32 h-32 md:bottom-16 md:right-16 md:w-40 md:h-40 transform rotate-6 hover:rotate-0 transition-transform duration-300 z-20">
                   <div class="relative w-full h-full">
                     <div class="absolute inset-0 bg-white rounded-2xl shadow-lg border-2 border-white"></div>
                     <div class="absolute inset-1 rounded-xl overflow-hidden">
@@ -391,7 +391,7 @@ function getImage(name: string) {
               </div>
 
               <!-- Question Section -->
-              <div class="text-center">
+              <div class="text-center select-none">
                 <h5 class="text-2xl md:text-3xl text-neutral-800 font-poetsen-one mb-2">
                   Do you like this food?
                 </h5>

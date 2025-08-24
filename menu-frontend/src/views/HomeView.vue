@@ -25,14 +25,6 @@ const { isAuthenticated } = storeToRefs(auth)
 
 <template>
   <div class="pt-10 px-5 flex flex-col gap-5">
-    <RouterLink to="/chat">
-      <button
-        class="rounded-2xl bg-red-600 px-6 py-4 text-white font-bold cursor-pointer text-center w-full"
-      >
-        Open Chat
-      </button>
-    </RouterLink>
-
     <RouterLink v-if="isAuthenticated" to="/swipe">
       <button
         class="rounded-2xl bg-red-600 px-6 py-4 text-white font-bold cursor-pointer text-center w-full"
