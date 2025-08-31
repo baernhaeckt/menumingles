@@ -224,9 +224,6 @@ Quickly extract the final weekly menu (one menu per day) as a SINGLE JSON object
                 "chef_name": chef["name"]
             })
 
-            # Only pick max 2 people from the people list
-            people = people[:2] if len(people) > 2 else people
-
             # Load people specifications
             logger.log_debug("Loading people specifications")
             persons = [
@@ -251,10 +248,6 @@ Quickly extract the final weekly menu (one menu per day) as a SINGLE JSON object
 
             # Combine all participants
             persons.extend(consultants)
-
-            # Set MAX_EPISODE_LENGTH to 1 for persons and consultants, so that they don't chat too long
-            for p in persons:
-                p.MAX_EPISODE_LENGTH = 1
 
             persons.append(chef)
             logger.log_info("All participants combined", additional_context={
@@ -302,7 +295,7 @@ Quickly extract the final weekly menu (one menu per day) as a SINGLE JSON object
 
             # Run initial discussion
             logger.log_debug("Running initial discussion round")
-            focus_group.run(1)
+            focus_group.run(3)
             logger.log_info("Initial discussion round completed")
 
             # Broadcast final decision request
