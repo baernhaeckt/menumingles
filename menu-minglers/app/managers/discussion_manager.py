@@ -158,16 +158,18 @@ The menu is a list of dishes with the ingredients for each day.
     {menu}
 """
 
+    # Faster Feedback, add the following: Always give feedback about all dishes and ingredients in one message.
+
     task = """
-Be brief and utilitarian, concise and answer directly. Answer in one to three sentences. Think about the menu and the ingredients for each day. Tell if you like the dish or not. Do not tell things that others already know or said. Always give feedback about all dishes and ingredients in one message.
+Be brief and utilitarian, concise and answer directly. Answer in one to three sentences. Think about the menu and the ingredients for each day. Tell if you like the dish or not. Do not tell things that others already know or said.
 """
 
     chef_thoughts = """
-I am the chef and I am responsible for the menu. I will make the final decision for delicous dishes. I am able to switch ingredients based on the wishes of the group and the suggestions of the consultants. I do not discuss about my personal like or dislike of the dishes and their ingredients, but only about my professional opinion about the ingredients. Always give feedback about all dishes and ingredients in one message.
+I am the chef and I am responsible for the menu. I will make the final decision for delicous dishes. I am able to switch ingredients based on the wishes of the group and the suggestions of the consultants. The suggestions must be followed and the ingredients must be switched if necessary. I do not discuss about my personal like or dislike of the dishes and their ingredients, but only about my professional opinion about the ingredients.
 """
 
     consultant_thoughts = """
-I am a consultant and I am here to help in my specific field. I am able to suggest ingredients based on the wishes of the group and the suggestions of the chef. I do not discuss about my personal like or dislike of the dishes and their ingredients, but only about my professional opinion about the ingredients. Always give feedback about all dishes and ingredients in one message.
+I am a consultant and I am here to help in my specific field. I am able to suggest ingredients based on the wishes of the group and the suggestions of the chef. I do not discuss about my personal like or dislike of the dishes and their ingredients, but only about my professional opinion about the ingredients.
 """
 
     extraction_objective = """
@@ -295,7 +297,7 @@ Quickly extract the final weekly menu (one menu per day) as a SINGLE JSON object
 
             # Run initial discussion
             logger.log_debug("Running initial discussion round")
-            focus_group.run(3)
+            focus_group.run(2)
             logger.log_info("Initial discussion round completed")
 
             # Broadcast final decision request
